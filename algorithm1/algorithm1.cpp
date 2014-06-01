@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "algorithm1.h"
 #include "cache_ssd.h"
 
@@ -26,35 +27,27 @@ struct trace {
 	float time_stamp;
 } ;
 
-int cnt = 0;
+
 int q[4];
+int cnt = 0;
 int mru_cnt[4];
 int lru_cnt[4];
+int page_fault = 0;
+int reference_cnt = 0;
+int hit_cnt = 0;
+
 bool found = false;
-int test[] = { 1, 2, 3, 3, 5, 5, 6 };
-
-void call_lru()
-{
-	for (int j = 0; j < 7; j++)
-	{
-		lru(test[j]);
-	}
-	for (int k = 0; k < 4; k++)
-	{
-		printf("%d\n", q[k]);
-		printf("%d\n", lru_cnt[k]);
-		printf("%d\n", mru_cnt[k]);
-	}
-
-}
-void lru(int reference)
-{
+struct output_entry lru(int reference)
+{	
+	output_entry stat;
+	reference_cnt++;
 	found = false;
 	for (int i = 0; i < cnt; i++)
 	{
 		lru_cnt[i]++;
 		if (q[i] == reference)
 		{
+			hit_cnt++;
 			mru_cnt[i]++;
 			//get next reference
 			found = true;
@@ -71,120 +64,119 @@ void lru(int reference)
 		//replacement is happening
 		else
 		{
+			printf("The queue is full, will replace the old block\n");
+			page_fault++;
+			//compare the mru cnt of the each block
+			for (int j = 0; j < 3; j++)
+			{
+				if (mru_cnt[j] < mru_cnt[j + 1])
+				{
+					//swap the value
+					int temp = q[j];
+					q[j] = q[j + 1];
+					q[j + 1] = temp;
+					//swap the mru cnt
+					int temp_mru_cnt = mru_cnt[j];
+					mru_cnt[j] = mru_cnt[j + 1];
+					mru_cnt[j + 1] = temp_mru_cnt;
+					//swap the lru cnt
+					int temp_lru_cnt = lru_cnt[j];
+					lru_cnt[j] = lru_cnt[j + 1];
+					lru_cnt[j + 1] = temp_lru_cnt;
 
+				}
+				else if (mru_cnt[j] == mru_cnt[j+1])
+				{
+					if (lru_cnt[j] > lru_cnt[j + 1])
+					{
+						int temp2 = q[j];
+						q[j] = q[j + 1];
+						q[j + 1] = temp2;
+						//swap the cnt
+						int temp_cnt = mru_cnt[j];
+						mru_cnt[j] = mru_cnt[j + 1];
+						mru_cnt[j + 1] = temp_cnt;
+						//swap the lru cnt
+						int temp_lru_cnt = lru_cnt[j];
+						lru_cnt[j] = lru_cnt[j + 1];
+						lru_cnt[j + 1] = temp_lru_cnt;
+					}
+				}
+			}
+			//get the relaced block
+			printf("the block %d is replaced\n", q[3]);
+			q[3] = reference;
+			//set the mru cnt for the new block
+			mru_cnt[3] = 0;
+			lru_cnt[3] = 0;
+		}
+	}
+	//count the total of page fault
+	stat.page_fault = page_fault;
+	stat.hit_rate = (float)hit_cnt / reference_cnt;
+	return stat;
+
+}
+/*temp comment out
+struct output_entry larc(int reference)
+{
+	int ghost_q[3] = { 0 };
+	output_entry stat;
+	reference_cnt++;
+	found = false;
+	for (int i = 0; i < cnt; i++)
+	{
+		lru_cnt[i]++;
+		if (q[i] == reference)
+		{
+			hit_cnt++;
+			mru_cnt[i]++;
+			//get next reference
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+	{
+		if (cnt < 4)
+		{
+			q[cnt] = reference;
+			cnt++;
+		}
+		//replacement is happening
+		else
+		{
 		}
 	}
 
 
 }
-//void lru(trace test_sample, int reference[])
-//{
-//	printf("%s\n", test_sample.addr);
-//	printf("%d\n", test_sample.size);
-//
-//	//int q[num_blocks], p[num_pages], c = 0, c1, d, f, i, j, k = 0, n, r, t, b[num_blocks], c2[num_blocks];
-//
-//	//page_idx = atoi(test_sample.addr) / CACHE_LINE_SIZE;
-//
-//	//printf("Enter no of pages:");
-//	////scanf("%d", &n);
-//	//n = num_pages;
-//
-//	//printf("Enter the reference string:");
-//	//for (i = 0; i < cnt_transfer; i++)
-//	//	p[i] = page_ref[i];
-//	//	//scanf("%d", &p[i]);
-//	//printf("Enter no of frames:");
-//	////scanf("%d", &f);
-//	//f = num_blocks;
-//	//q[k] = p[k];
-//	//printf("\n\t%d\n", q[k]);
-//	//c++;
-//	//k++;
-//	//for (i = 1; i<n; i++)
-//	//{
-//	//	c1 = 0;
-//	//	for (j = 0; j<f; j++)
-//	//	{
-//	//		if (p[i] != q[j])
-//	//			c1++;
-//	//	}
-//	//	if (c1 == f)
-//	//	{
-//	//		c++;
-//	//		if (k<f)
-//	//		{
-//	//			q[k] = p[i];
-//	//			k++;
-//	//			for (j = 0; j<k; j++)
-//	//				printf("\t%d", q[j]);
-//	//			printf("\n");
-//	//		}
-//	//		else
-//	//		{
-//	//			for (r = 0; r<f; r++)
-//	//			{
-//	//				c2[r] = 0;
-//	//				for (j = i - 1; j<n; j--)
-//	//				{
-//	//					if (q[r] != p[j])
-//	//						c2[r]++;
-//	//					else
-//	//						break;
-//	//				}
-//	//			}
-//	//			for (r = 0; r<f; r++)
-//	//				b[r] = c2[r];
-//	//			for (r = 0; r<f; r++)
-//	//			{
-//	//				for (j = r; j<f; j++)
-//	//				{
-//	//					if (b[r]<b[j])
-//	//					{
-//	//						t = b[r];
-//	//						b[r] = b[j];
-//	//						b[j] = t;
-//	//					}
-//	//				}
-//	//			}
-//	//			for (r = 0; r<f; r++)
-//	//			{
-//	//				if (c2[r] == b[0])
-//	//					q[r] = p[i];
-//	//				printf("\t%d", q[r]);
-//	//			}
-//	//			printf("\n");
-//	//		}
-//	//	}
-//	//}
-//	//printf("\nThe no of page faults is %d", c);
-//	//output_entry new_entry;
-//	//new_entry.page_fault = c;
-//	//new_entry.time_stamp = test_sample.time_stamp;
-//	//new_entry.hit_rate = 0.5;
-//	//ouput_helper(new_entry);
-//
-//}
-
+*/
 void algorithm1(char *sim_file, char *output)
     {
 
         printf("this is the 1th algorithm\n");
-        printf("using the test file %s\n", sim_file);
-		trace_parser("c:\\trace.txt");
+		int q[4] = { 0 };
+		int mru_cnt[4] = { 0 };
+		int lru_cnt[4] = { 0 };
+		int cnt = 0;
+		page_fault = 0;
+		hit_cnt = 0;
+		reference_cnt = 0;
+		trace_parser(sim_file, output);
         printf("output the result to %s\n", output);
-
     }
 
-void trace_parser(char *trace_file)
+void trace_parser(char *trace_file, char* result)
 {
 	FILE * trace_f;
 	int i;
-	
+	int page_idx;
 	char *p;
 	char *array[4];
 	trace sample;
-	
+	output_entry output;
+	cnt = 0;
 	trace_f = fopen(trace_file, "r");
 	if (trace_f != NULL)
 	{
@@ -200,21 +192,20 @@ void trace_parser(char *trace_file)
 			{
 				array[i++] = p;
 				p = strtok(NULL, ",");
-			}
-			
+			}			
 			sample.addr = array[0];
 			sample.size = atoi(array[1]);
 			sample.mode = array[2];
 			sample.time_stamp = atof(array[3]);
 			page_ref[cnt_transfer] = atoi(sample.addr);
-			cnt_transfer++;
-			//lru(sample, page_ref);
-			call_lru();
+			page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;	
+			output.time_stamp = sample.time_stamp;
+			output.page_fault = lru(page_idx).page_fault;
+			output.hit_rate = lru(page_idx).hit_rate;
+			output_helper(output, result);
 		}
 		fclose(trace_f);
-	}
-	
-	
+	}	
 }
 
 

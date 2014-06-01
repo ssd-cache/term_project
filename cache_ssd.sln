@@ -6,12 +6,15 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cache_ssd", "cache_ssd\cache_ssd.vcxproj", "{9D5600D3-BC95-4478-93C0-57265C8B6DF9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{12B5FF73-D343-4009-941A-5BEA69090ADA} = {12B5FF73-D343-4009-941A-5BEA69090ADA}
+		{43EB748D-CE07-4786-A351-FDA63FF4A3F6} = {43EB748D-CE07-4786-A351-FDA63FF4A3F6}
 		{E58E6598-0B95-4180-965C-A0E5B13523C4} = {E58E6598-0B95-4180-965C-A0E5B13523C4}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algorithm1", "algorithm1\algorithm1.vcxproj", "{E58E6598-0B95-4180-965C-A0E5B13523C4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algorithm2", "algorithm2\algorithm2.vcxproj", "{12B5FF73-D343-4009-941A-5BEA69090ADA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algorithm3", "algorithm3\algorithm3.vcxproj", "{43EB748D-CE07-4786-A351-FDA63FF4A3F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +34,10 @@ Global
 		{12B5FF73-D343-4009-941A-5BEA69090ADA}.Debug|Win32.Build.0 = Debug|Win32
 		{12B5FF73-D343-4009-941A-5BEA69090ADA}.Release|Win32.ActiveCfg = Release|Win32
 		{12B5FF73-D343-4009-941A-5BEA69090ADA}.Release|Win32.Build.0 = Release|Win32
+		{43EB748D-CE07-4786-A351-FDA63FF4A3F6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{43EB748D-CE07-4786-A351-FDA63FF4A3F6}.Debug|Win32.Build.0 = Debug|Win32
+		{43EB748D-CE07-4786-A351-FDA63FF4A3F6}.Release|Win32.ActiveCfg = Release|Win32
+		{43EB748D-CE07-4786-A351-FDA63FF4A3F6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

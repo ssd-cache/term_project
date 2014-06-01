@@ -5,6 +5,6 @@ struct output_entry
 	float hit_rate;
 };
 
-void ouput_helper(struct output_entry input);
-void simulation(char *test_file);
+void output_helper(struct output_entry input, char *output_file);
+void simulation(char *test_file, int cnt_trace);
 void result_parser(char *result_file);
