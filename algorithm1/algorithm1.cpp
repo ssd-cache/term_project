@@ -19,14 +19,14 @@ int frame_idx = 0;
 int page_idx = 0;
 int page_ref[num_pages];
 int cnt_transfer = 0;
-
+/*
 struct trace {
 	char* addr;
 	int size;
 	char* mode;
 	float time_stamp;
 } ;
-
+*/
 
 int q[4];
 int cnt = 0;
@@ -35,6 +35,7 @@ int lru_cnt[4];
 int page_fault = 0;
 int reference_cnt = 0;
 int hit_cnt = 0;
+
 
 bool found = false;
 struct output_entry lru(int reference)
@@ -166,47 +167,6 @@ void algorithm1(char *sim_file, char *output)
 		trace_parser(sim_file, output);
         printf("output the result to %s\n", output);
     }
-
-void trace_parser(char *trace_file, char* result)
-{
-	FILE * trace_f;
-	int i;
-	int page_idx;
-	char *p;
-	char *array[4];
-	trace sample;
-	output_entry output;
-	cnt = 0;
-	trace_f = fopen(trace_file, "r");
-	if (trace_f != NULL)
-	{
-		char line[128];
-		while (fgets(line, sizeof(line), trace_f) != NULL)
-		{
-			i = 0;
-			
-			fputs(line, stdout);
-			//split the line into the struct
-			p = strtok(line, ",");
-			while (p != NULL)
-			{
-				array[i++] = p;
-				p = strtok(NULL, ",");
-			}			
-			sample.addr = array[0];
-			sample.size = atoi(array[1]);
-			sample.mode = array[2];
-			sample.time_stamp = atof(array[3]);
-			page_ref[cnt_transfer] = atoi(sample.addr);
-			page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;	
-			output.time_stamp = sample.time_stamp;
-			output.page_fault = lru(page_idx).page_fault;
-			output.hit_rate = lru(page_idx).hit_rate;
-			output_helper(output, result);
-		}
-		fclose(trace_f);
-	}	
-}
 
 
 

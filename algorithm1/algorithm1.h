@@ -11,8 +11,7 @@
 
 
 
-void trace_parser(char *trace_file, char *result);
-//void lru(struct Trace sample, int reference[]);
+//void trace_parser(char *trace_file, char *result);
 struct output_entry lru(int reference);
 struct output_entry larc(int reference);
 void algorithm1(char *sim_file, char*output);
