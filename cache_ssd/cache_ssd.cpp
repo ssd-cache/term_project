@@ -10,24 +10,26 @@
 #include <sstream>
 #include <direct.h>
 #include "cache_ssd.h"
+
 using namespace std;
 //const char *output_file = "output.csv";
 
 extern int cnt;
 
-void simulation(char *dat, int cnt_trace)
+
+void simulation(char *dat, char *file_name)
     {
         printf("start running the simulation\n");
 		algorithm2();
 		algorithm3();
-		char *cur_dir;
-		char dir_cnt[128];
-		itoa(cnt_trace, dir_cnt, 10);
-		cur_dir = (char *)malloc(100 * sizeof(char));
-		getcwd(cur_dir, 100);
-		char *output = strcat(cur_dir, "\\");
-		output = strcat(output, dir_cnt);
-		output = strcat(output, "_output.csv");
+		//char *cur_dir;
+		//char dir_cnt[128];
+		//itoa(cnt_trace, dir_cnt, 10);
+		//cur_dir = (char *)malloc(100 * sizeof(char));
+		//getcwd(cur_dir, 100);
+		//char *output = strcat(cur_dir, "\\");
+		//output = strcat(output, dir_cnt);
+		char *output = strcat(file_name, ".csv");
         algorithm1(dat, output);
     }
 void output_helper(struct output_entry input, char* output_file)
@@ -90,12 +92,26 @@ void trace_parser(char *trace_file, char* result)
 int main(int argc, _TCHAR* argv[])
 {
 
-    char *trace_files[] = {"c:\\trace1.txt", "c:\\trace2.txt"};
-    for (int i=0; i<sizeof(trace_files)/sizeof(trace_files[0]); i++)
-        {
-            printf("the test dat is %s\n", trace_files[i]);
-            simulation(trace_files[i], i);
-        }
+	char *trace_file;
+	//get the list of the trace files
+	system("dir /b .\\trace\\ >file.txt");
+	FILE *file_list = fopen("file.txt", "r");
+	if (file_list != NULL)
+	{
+		char line[128];
+		while (fgets(line, sizeof(line), file_list) != NULL)
+		{
+			fputs(line, stdout);
+			char trace_dir[128];
+			char trace_file[128];
+			strcpy(trace_dir, ".\\trace\\");
+			line[strlen(line) - 1] = '\0';
+			strcat(trace_dir, line);
+			strcpy(trace_file, trace_dir);
+			printf("the test dat is %s\n", trace_file);
+			simulation(trace_file,line);
+		}
+	}
 	return 0;
 }
 

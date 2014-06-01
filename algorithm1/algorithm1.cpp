@@ -19,14 +19,6 @@ int frame_idx = 0;
 int page_idx = 0;
 int page_ref[num_pages];
 int cnt_transfer = 0;
-/*
-struct trace {
-	char* addr;
-	int size;
-	char* mode;
-	float time_stamp;
-} ;
-*/
 
 int q[4];
 int cnt = 0;
@@ -35,9 +27,8 @@ int lru_cnt[4];
 int page_fault = 0;
 int reference_cnt = 0;
 int hit_cnt = 0;
-
-
 bool found = false;
+
 struct output_entry lru(int reference)
 {	
 	output_entry stat;
