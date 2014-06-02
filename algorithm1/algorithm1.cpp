@@ -152,9 +152,10 @@ struct output_entry larc(int reference)
 
 }
 */
-void algorithm1(char *sim_file, char *output)
+void algorithm1(char *sim_file, char *output, void *arg)
     {
-
+		// added void pointer of the sizes array
+		SizeInfo *size = (SizeInfo*)arg;
         printf("this is the 1th algorithm\n");
 		int q[4] = { 0 };
 		int mru_cnt[4] = { 0 };

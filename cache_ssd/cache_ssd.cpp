@@ -5,6 +5,7 @@
 #include "algorithm1.h"
 #include "algorithm2.h"
 #include "algorithm3.h"
+#include "StringManip.h"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -15,10 +16,9 @@ using namespace std;
 
 
 
-void simulation(char *dat, int cnt_trace)
+void simulation(char *dat, int cnt_trace, SizeInfo *sizeArr)
     {
         printf("start running the simulation\n");
-		algorithm2();
 		algorithm3();
 		char *cur_dir;
 		char cnt[128];
@@ -28,7 +28,9 @@ void simulation(char *dat, int cnt_trace)
 		char *output = strcat(cur_dir, "\\");
 		output = strcat(output, cnt);
 		output = strcat(output, "_output.csv");
-        algorithm1(dat, output);
+		// chi added the size array of the users input sizes
+        algorithm1(dat, output, sizeArr);
+		algorithm2(dat, output, sizeArr);
     }
 void output_helper(struct output_entry input, char* output_file)
     {
@@ -44,15 +46,54 @@ void output_helper(struct output_entry input, char* output_file)
 		
     }
 
+void getSizeInput(SizeInfo *sizeArr)
+{
+	// local varaibles
+	char tempInput[1024];
+
+	// get sizes needed for project
+	for(int i=0; i<3; i++)
+	{
+		if(i == 0)
+		{
+			printf("Enter cache size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr);
+		}
+		else if(i == 1)
+		{
+			printf("Enter block size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr);
+		}
+		else if(i == 2)
+		{
+			printf("Enter page size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr);
+		}
+		rewind(stdin);
+	}
+	return;
+}
+
 
 int main(int argc, _TCHAR* argv[])
 {
 
     char *trace_files[] = {"c:\\trace1.txt", "c:\\trace2.txt"};
+	SizeInfo sizeArr[3];
+
     for (int i=0; i<sizeof(trace_files)/sizeof(trace_files[0]); i++)
         {
             printf("the test dat is %s\n", trace_files[i]);
-            simulation(trace_files[i], i);
+            simulation(trace_files[i], i, sizeArr);
         }
 	return 0;
 }
