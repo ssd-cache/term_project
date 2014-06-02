@@ -19,7 +19,7 @@ using namespace std;
 void simulation(char *dat, int cnt_trace, SizeInfo *sizeArr)
     {
         printf("start running the simulation\n");
-		algorithm3();
+		//algorithm3();
 		char *cur_dir;
 		char cnt[128];
 		itoa(cnt_trace, cnt, 10);
@@ -29,7 +29,7 @@ void simulation(char *dat, int cnt_trace, SizeInfo *sizeArr)
 		output = strcat(output, cnt);
 		output = strcat(output, "_output.csv");
 		// chi added the size array of the users input sizes
-        algorithm1(dat, output, sizeArr);
+       //algorithm1(dat, output, sizeArr);
 		algorithm2(dat, output, sizeArr);
     }
 void output_helper(struct output_entry input, char* output_file)
@@ -89,6 +89,9 @@ int main(int argc, _TCHAR* argv[])
 
     char *trace_files[] = {"c:\\trace1.txt", "c:\\trace2.txt"};
 	SizeInfo sizeArr[3];
+
+	// getting size info
+	getSizeInput(sizeArr);
 
     for (int i=0; i<sizeof(trace_files)/sizeof(trace_files[0]); i++)
         {

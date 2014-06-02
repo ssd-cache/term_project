@@ -33,4 +33,3 @@ LB_Clock* initClock();
 void setBlockOfCache(LB_Clock *lb_clock);
 void setPageOfBlocks(LB_Clock *lb_clock);
 void createCacheOfBlocks(LB_Clock *lb_clock);
-

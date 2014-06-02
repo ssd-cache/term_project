@@ -27,6 +27,14 @@ void algorithm2(char *sim_file, char *output, void *arg)
 
 	// initializing struct
 	lb_clock = initClock();
+	
+	// setting sizes
+	lb_clock->cacheSize.size = size[0].size;
+	lb_clock->cacheSize.type = (char*)malloc(strlen(size[0].type)+1);
+	lb_clock->blockSize.size = size[1].size;
+	lb_clock->blockSize.type = (char*)malloc(strlen(size[1].type)+1);
+	lb_clock->pageSize.size = size[2].size;
+	lb_clock->pageSize.type = (char*)malloc(strlen(size[2].type)+1);
 
 	while(fgets(tempInput, sizeof(tempInput), traceFile) != NULL)
 	{
