@@ -60,7 +60,7 @@ void getSizeInput(SizeInfo *sizeArr)
 			fgets(tempInput, sizeof(tempInput), stdin);
 			lowerCaseString(tempInput);
 			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
+			splitInput(tempInput, &sizeArr[0]);
 		}
 		else if(i == 1)
 		{
@@ -68,7 +68,7 @@ void getSizeInput(SizeInfo *sizeArr)
 			fgets(tempInput, sizeof(tempInput), stdin);
 			lowerCaseString(tempInput);
 			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
+			splitInput(tempInput, &sizeArr[1]);
 		}
 		else if(i == 2)
 		{
@@ -76,7 +76,7 @@ void getSizeInput(SizeInfo *sizeArr)
 			fgets(tempInput, sizeof(tempInput), stdin);
 			lowerCaseString(tempInput);
 			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
+			splitInput(tempInput, &sizeArr[2]);
 		}
 		rewind(stdin);
 	}
@@ -87,7 +87,7 @@ void getSizeInput(SizeInfo *sizeArr)
 int main(int argc, _TCHAR* argv[])
 {
 
-    char *trace_files[] = {"c:\\trace1.txt", "c:\\trace2.txt"};
+	char *trace_files[] = {"trace1.txt"}; //, "c:\\trace2.txt"};
 	SizeInfo sizeArr[3];
 
 	// getting size info

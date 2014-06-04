@@ -1,4 +1,8 @@
 #include "stdafx.h"
+#include <math.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include "StringManip.h"
 #include "cache_ssd.h"
 

@@ -17,4 +17,4 @@ struct output_entry lru(int reference);
 struct output_entry larc(int reference);
 
 // added a void pointer to pass the size array of user input sizes
-void algorithm1(char *sim_file, char*output, void *arg);
+void algorithm1(char *sim_file, char*output, void *size);	// added pointer of the sizes array

@@ -25,7 +25,7 @@ struct trace {
 	int size;
 	char* mode;
 	float time_stamp;
-} ;
+};
 
 
 int q[4];
@@ -152,10 +152,10 @@ struct output_entry larc(int reference)
 
 }
 */
-void algorithm1(char *sim_file, char *output, void *arg)
+void algorithm1(char *sim_file, char *output, void* size)
     {
-		// added void pointer of the sizes array
-		SizeInfo *size = (SizeInfo*)arg;
+		// added pointer of the sizes array
+		SizeInfo *sp = (SizeInfo*) size;
         printf("this is the 1th algorithm\n");
 		int q[4] = { 0 };
 		int mru_cnt[4] = { 0 };
