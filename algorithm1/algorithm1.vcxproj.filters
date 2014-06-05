@@ -27,15 +27,18 @@
     <ClInclude Include="algorithm1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hashtable.c">
+    <ClCompile Include="algorithm1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="algorithm1.cpp">
+    <ClCompile Include="hashtable.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

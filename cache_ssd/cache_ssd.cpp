@@ -8,13 +8,12 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <direct.h>
 #include "cache_ssd.h"
 
-using namespace std;
-//const char *output_file = "output.csv";
 
+using namespace std;
 extern int cnt;
+
 
 
 void simulation(char *dat, char *file_name)
@@ -22,13 +21,6 @@ void simulation(char *dat, char *file_name)
         printf("start running the simulation\n");
 		algorithm2();
 		algorithm3();
-		//char *cur_dir;
-		//char dir_cnt[128];
-		//itoa(cnt_trace, dir_cnt, 10);
-		//cur_dir = (char *)malloc(100 * sizeof(char));
-		//getcwd(cur_dir, 100);
-		//char *output = strcat(cur_dir, "\\");
-		//output = strcat(output, dir_cnt);
 		char *output = strcat(file_name, ".csv");
         algorithm1(dat, output);
     }
@@ -77,10 +69,12 @@ void trace_parser(char *trace_file, char* result)
 			sample.mode = array[2];
 			sample.time_stamp = atof(array[3]);
 			//page_ref[cnt_transfer] = atoi(sample.addr);
-			page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;
+			long value = strtol(sample.addr, NULL, 16);
+			page_idx = value / CACHE_LINE_SIZE;
+			//page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;
 			output.time_stamp = sample.time_stamp;
 			//call the algorithm
-			output_entry temp = lru(page_idx);
+			output_entry temp = larc(page_idx);
 			output.page_fault = temp.page_fault;
 			output.hit_rate = temp.hit_rate;
 			output_helper(output, result);
@@ -91,8 +85,6 @@ void trace_parser(char *trace_file, char* result)
 
 int main(int argc, _TCHAR* argv[])
 {
-
-	char *trace_file;
 	//get the list of the trace files
 	system("dir /b .\\trace\\ >file.txt");
 	FILE *file_list = fopen("file.txt", "r");
