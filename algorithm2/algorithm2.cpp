@@ -416,36 +416,34 @@ LB_Node* checkVictimSetWrite(LB_Clock *lb_clock)
 	LB_Node *evictNodeA, *evictNodeB, *finalEvictNode, *currNode;
 	int reset;
 
-	currNode = lb_clock->clockStart;
+	currNode = lb_clock->clockHand;
 	evictNodeA = NULL;
 	evictNodeB = NULL;
 
-	while(currNode->next != lb_clock->clockStart)
+	while(currNode->next != lb_clock->clockHand)
 	{
-		for(int j=1; j < lb_clock->blockPerCache; j++)
+		// think about logic here.....test
+		if(currNode->refBit == 0)
 		{
-			// think about logic here.....
-			if(currNode->blockNum == lb_clock->victimCandidateSet[j-1])
+			if(evictNodeB == NULL)
 			{
-				evictNodeA = currNode;
+				evictNodeB = evictNodeA;
 			}
-			if(currNode->blockNum == lb_clock->victimCandidateSet[j])
+			evictNodeA = currNode;
+		}
+		if(evictNodeA != NULL && evictNodeB != NULL)
+		{
+			if(evictNodeB->currNumOfPages < evictNodeA->currNumOfPages)
 			{
-				evictNodeB = currNode;
-			}
-			if(evictNodeA != NULL && evictNodeB != NULL)
-			{
-				if(evictNodeB->currNumOfPages < evictNodeA->currNumOfPages)
-				{
-					finalEvictNode = evictNodeA;
-					// testing to see if this holds for reseting victim set
-					// that was evicted
-					reset = j-1;
-				}
+				finalEvictNode = evictNodeA;
+				// testing to see if this holds for reseting victim set
+				// that was evicted
+				//reset = j-1;
 			}
 		}
 		currNode = currNode->next;
 	}
+
 
 	//evictNodeFromCache
 	return finalEvictNode;
@@ -527,7 +525,7 @@ int updateRefBit(LB_Clock *lb_clock)
 			if(currNode->refBit == 1)
 			{
 				currNode->refBit = 0;
-				lb_clock->victimCandidateSet[i++] = currNode->blockNum;
+				//lb_clock->victimCandidateSet[i++] = currNode->blockNum;
 				updated = 1;
 			}
 			currNode = currNode->next;
