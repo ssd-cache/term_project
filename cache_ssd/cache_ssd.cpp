@@ -5,32 +5,24 @@
 #include "algorithm1.h"
 #include "algorithm2.h"
 #include "algorithm3.h"
-#include "StringManip.h"
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <direct.h>
 #include "cache_ssd.h"
+
+
 using namespace std;
-//const char *output_file = "output.csv";
+extern int cnt;
 
 
 
-void simulation(char *dat, int cnt_trace, SizeInfo *sizeArr)
+void simulation(char *dat, char *file_name)
     {
         printf("start running the simulation\n");
-		//algorithm3();
-		char *cur_dir;
-		char cnt[128];
-		itoa(cnt_trace, cnt, 10);
-		cur_dir = (char *)malloc(100 * sizeof(char));
-		getcwd(cur_dir, 100);
-		char *output = strcat(cur_dir, "\\");
-		output = strcat(output, cnt);
-		output = strcat(output, "_output.csv");
-		// chi added the size array of the users input sizes
-       //algorithm1(dat, output, sizeArr);
-		algorithm2(dat, output, sizeArr);
+		algorithm2();
+		algorithm3();
+		char *output = strcat(file_name, ".csv");
+        algorithm1(dat, output);
     }
 void output_helper(struct output_entry input, char* output_file)
     {
@@ -46,58 +38,72 @@ void output_helper(struct output_entry input, char* output_file)
 		
     }
 
-void getSizeInput(SizeInfo *sizeArr)
+void trace_parser(char *trace_file, char* result)
 {
-	// local varaibles
-	char tempInput[1024];
-
-	// get sizes needed for project
-	for(int i=0; i<3; i++)
+	FILE * trace_f;
+	int i;
+	int page_idx;
+	char *p;
+	char *array[4];
+	cnt = 0;
+	trace sample;
+	output_entry output;
+	trace_f = fopen(trace_file, "r");
+	if (trace_f != NULL)
 	{
-		if(i == 0)
+		char line[128];
+		while (fgets(line, sizeof(line), trace_f) != NULL)
 		{
-			printf("Enter cache size: ");
-			fgets(tempInput, sizeof(tempInput), stdin);
-			lowerCaseString(tempInput);
-			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
-		}
-		else if(i == 1)
-		{
-			printf("Enter block size: ");
-			fgets(tempInput, sizeof(tempInput), stdin);
-			lowerCaseString(tempInput);
-			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
-		}
-		else if(i == 2)
-		{
-			printf("Enter page size: ");
-			fgets(tempInput, sizeof(tempInput), stdin);
-			lowerCaseString(tempInput);
-			removeSpaces(tempInput);
-			splitInput(tempInput, &sizeArr);
-		}
-		rewind(stdin);
-	}
-	return;
-}
+			i = 0;
 
+			fputs(line, stdout);
+			//split the line into the struct
+			p = strtok(line, ",");
+			while (p != NULL)
+			{
+				array[i++] = p;
+				p = strtok(NULL, ",");
+			}
+			sample.addr = array[0];
+			sample.size = atoi(array[1]);
+			sample.mode = array[2];
+			sample.time_stamp = atof(array[3]);
+			//page_ref[cnt_transfer] = atoi(sample.addr);
+			long value = strtol(sample.addr, NULL, 16);
+			page_idx = value / CACHE_LINE_SIZE;
+			//page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;
+			output.time_stamp = sample.time_stamp;
+			//call the algorithm
+			output_entry temp = larc(page_idx);
+			output.page_fault = temp.page_fault;
+			output.hit_rate = temp.hit_rate;
+			output_helper(output, result);
+		}
+		fclose(trace_f);
+	}
+}
 
 int main(int argc, _TCHAR* argv[])
 {
-
-    char *trace_files[] = {"c:\\trace1.txt", "c:\\trace2.txt"};
-	SizeInfo sizeArr[3];
-
-	// getting size info
-	getSizeInput(sizeArr);
-
-    for (int i=0; i<sizeof(trace_files)/sizeof(trace_files[0]); i++)
-        {
-            printf("the test dat is %s\n", trace_files[i]);
-            simulation(trace_files[i], i, sizeArr);
-        }
+	//get the list of the trace files
+	system("dir /b .\\trace\\ >file.txt");
+	FILE *file_list = fopen("file.txt", "r");
+	if (file_list != NULL)
+	{
+		char line[128];
+		while (fgets(line, sizeof(line), file_list) != NULL)
+		{
+			fputs(line, stdout);
+			char trace_dir[128];
+			char trace_file[128];
+			strcpy(trace_dir, ".\\trace\\");
+			line[strlen(line) - 1] = '\0';
+			strcat(trace_dir, line);
+			strcpy(trace_file, trace_dir);
+			printf("the test dat is %s\n", trace_file);
+			simulation(trace_file,line);
+		}
+	}
 	return 0;
 }
 

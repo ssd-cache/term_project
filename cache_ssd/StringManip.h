@@ -1,9 +1,3 @@
-#include "stdafx.h"
-#include <math.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-
 
 int splitCommand(char* input, char* data, char* choice);
 void dataTypeSplit(char* data, void* arg);

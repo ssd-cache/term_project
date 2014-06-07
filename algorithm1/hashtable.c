@@ -1,134 +1,217 @@
-#include "hashtable.h"
+#include <string.h>
+#include <stdio.h>
+#include <limits.h>
+#include <math.h>
+#include "hash.h"
 
-#include <stdlib.h>
-#include <memory.h>
-#include <malloc.h>
 
-int hashtable_find(hashtable_t *hashtable, int keyHash)
-{
-	int i = 0;
+struct htab *hashtab[HASHELEMENTS];
 
-	for (; i < hashtable->entry_count; i++)
-	{
-		if (hashtable->entries[i].keyHash == keyHash)
-			return i;
+unsigned int hash(char *s) {
+	int i, n;			// Our temporary variables
+	unsigned int hashval;
+	unsigned int ival;
+	char *p;			// p lets us reference the integer value as a
+	// character array instead of an integer.  This
+	// is actually pretty bad style even though it
+	// works.  You should try a union if you know
+	// how to use them.
+
+	p = (char *)&ival;		// Make p point to i, without the type cast you					// should get a warning.
+
+	hashval = ival = 0;		// Initialize our variables
+
+	// Figure out how many characters are in an integer the correct answer is 4 (on an i386), but this should be more cross platform.
+	n = (((log10((double)(UINT_MAX)) / log10(2.0))) / CHAR_BIT) + 0.5;
+
+	// loop through s four characters at a time
+	for (i = 0; i < strlen(s); i += n) {
+		// voodoo to put the string in an integer don't try and use strcpy, it
+		// is a very bad idea and you will corrupt something.
+		strncpy(p, s + i, n);
+		// accumulate our values in hashval
+		hashval += ival;
 	}
 
-	return -1;
+	// divide by the number of elements and return our remainder
+	return hashval % HASHELEMENTS;
 }
 
-hashtableentry_t *hashtable_expand(hashtable_t *hashtable, int count)
-{
-	int oldLen = hashtable->entry_count * sizeof(hashtableentry_t);
+struct htab *addhash(char *key, char *data) {
+	struct htab *newhash;
+	struct htab *curhash;
+	unsigned int i, hashval;
 
-	if (count == 0)
-		return (hashtableentry_t *)((char *)hashtable->entries + oldLen);
-
-	hashtable->entry_count += count;
-	if (hashtable->entry_count <= 0)
-	{
-		hashtable->entries = NULL;
-		hashtable->entry_count = 0;
-		return;
-	}
-	hashtable->entries = (hashtableentry_t *)realloc(hashtable->entries, hashtable->entry_count * sizeof(hashtableentry_t));
-
-	return (hashtableentry_t *)((char *)hashtable->entries + oldLen);
-}
-
-void hashtable_init(hashtable_t *hashtable, hashtable_hash_function hash, hashtable_len_function len)
-{
-	if (!hashtable)
-		return;
-
-	hashtable->entries = NULL;
-	hashtable->entry_count = 0;
-
-	hashtable->hash = hash;
-	hashtable->len = len;
-}
-
-void hashtable_destroy(hashtable_t *hashtable)
-{
-	hashtable_clear(hashtable);
-}
-
-void hashtable_set(hashtable_t *hashtable, void *key, void *value)
-{
-	int keyHash = hashtable->hash(key, hashtable->len(key));
-	hashtableentry_t *ptr;
-	int i;
-
-	if ((i = hashtable_find(hashtable, keyHash)) != -1)
-	{
-		hashtable->entries[i].value = value;
-		return;
+	newhash = (struct htab *)(malloc(sizeof(struct htab)));
+	if (newhash == NULL) {
 	}
 
-	ptr = hashtable_expand(hashtable, 1);
-	ptr->keyHash = keyHash;
-	ptr->value = value;
+	for (i = 0; i <= strlen(key); i++) {
+		newhash->key[i] = key[i];
+	}
+	for (i = 0; i <= strlen(key); i++) {
+		newhash->data[i] = data[i];
+	}
+
+	hashval = hash(key);
+	//add into the linked list
+	if (hashtab[hashval] == NULL) {
+		hashtab[hashval] = newhash;
+		hashtab[hashval]->parent = NULL;
+		hashtab[hashval]->child = NULL;
+	}
+	else {
+		curhash = hashtab[hashval];
+		while (curhash->child != NULL) {
+			curhash = curhash->child;
+		}
+		curhash->child = newhash;
+		newhash->child = NULL;
+		newhash->parent = curhash;
+	}
+
+	return newhash;
 }
 
-int hashtable_get(hashtable_t *hashtable, void *key, void **value)
-{
-	int keyHash = hashtable->hash(key, hashtable->len(key));
-	int i;
-	
-	if ((i = hashtable_find(hashtable, keyHash)) != -1)
-	{
-		if (value)
-			*value = hashtable->entries[i].value;
+struct htab *findhash(char *key) {
+	unsigned int hashval;
+	struct htab *curhash;
 
+	hashval = 0;
+
+	hashval = hash(key);
+
+
+	if (hashtab[hashval] == NULL) {
+		return NULL;
+	}
+
+	if (!strcmp((hashtab[hashval]->key), (key))) {
+		curhash = hashtab[hashval];
+		return curhash;
+	}
+	else {
+		if (hashtab[hashval]->child == NULL) {
+			return NULL;
+		}
+
+		curhash = hashtab[hashval]->child;
+
+
+		if (!strcmp((curhash->key), (key))) {
+			return curhash;
+		}
+
+		while (curhash->child != NULL) {
+			if (!strcmp((curhash->key), (key))) {
+				return curhash;
+			}
+			curhash = curhash->child;
+		}
+		if (!strcmp((curhash->key), (key))) {
+			return curhash;
+		}
+		else {
+			return NULL;
+		}
+	}
+}
+
+int delhash(char *key) {
+	unsigned int hashval;
+	struct htab *curhash;
+
+	hashval = 0;
+
+	hashval = hash(key);
+
+
+	if (hashtab[hashval] == NULL) {
+		return 0;
+	}
+
+	if (!strcmp((hashtab[hashval]->key), (key))) {
+		curhash = hashtab[hashval];
+		hashtab[hashval] = curhash->child;
+		free(curhash);
 		return 1;
 	}
+	else {
+		if (hashtab[hashval]->child == NULL) {
+			return 0;
+		}
 
-	return 0;
-}
+		curhash = hashtab[hashval]->child;
 
-void hashtable_remove(hashtable_t *hashtable, void *key)
-{
-	int keyHash = hashtable->hash(key, hashtable->len(key));
-	int i;
 
-	if ((i = hashtable_find(hashtable, keyHash)) != -1)
-	{
-		int totalLen = (hashtable->entry_count - i) * sizeof(hashtableentry_t);
+		if (!strcmp((curhash->key), (key))) {
+			curhash->parent->child = curhash->child;
+			if (curhash->child != NULL) {
+				curhash->child->parent = curhash->parent;
+			}
+			free(curhash);
+			return 1;
+		}
 
-		if (totalLen > 0)
-			memcpy(&hashtable->entries[i], &hashtable->entries[i + 1], totalLen);
-
-		hashtable_expand(hashtable, -1);
+		while (curhash->child != NULL) {
+			if (!strcmp((curhash->key), (key))) {
+				curhash->parent->child = curhash->child;
+				if (curhash->child != NULL) {
+					curhash->child->parent = curhash->parent;
+				}
+				free(curhash);
+				return 1;
+			}
+			curhash = curhash->child;
+		}
+		if (!strcmp((curhash->key), (key))) {
+			curhash->parent->child = curhash->child;
+			if (curhash->child != NULL) {
+				curhash->child->parent = curhash->parent;
+			}
+			free(curhash);
+			return 1;
+		}
+		else {
+			return 0;
+		}
 	}
 }
 
-int hashtable_count(hashtable_t *hashtable)
-{
-	return hashtable->entry_count;
-}
+void hashprofile(int profile) {
+	int max, total, i, nodes, used;
+	double avg;
+	struct htab *curhash;
 
-void hashtable_clear(hashtable_t *hashtable)
-{
-	if (hashtable->entries)
-	{
-		free(hashtable->entries);
-		hashtable->entries = NULL;
+	max = total = i = nodes = used = 0;
+	avg = 0;
+
+	if (profile > 0) {
+		for (i = 0; i < HASHELEMENTS; i++) {
+			if (hashtab[i] != NULL) {
+				used++;
+				nodes = 0;
+				curhash = hashtab[i];
+				while (curhash != NULL) {
+					nodes++;
+					if (profile > 3) {
+						fprintf(stderr, "%lx -> %lx: %s (%s) -> %lx\n", curhash->parent, curhash, curhash->key, curhash->data, curhash->child);
+					}
+					curhash = curhash->child;
+				}
+				if (nodes != 0) total += nodes;
+				if (nodes > max) {
+					max = nodes;
+				}
+				if (profile > 1) {
+					fprintf(stderr, "i: %d\n", i);
+				}
+			}
+		}
+		avg = (double)(total) / (double)(used);
+		fprintf(stderr, "total: %d\n", total);
+		fprintf(stderr, "max: %d\n", max);
+		fprintf(stderr, "used: %lf\n", 100 * ((double)(used) / (double)(HASHELEMENTS)));
+		fprintf(stderr, "average: %lf\n", avg);
 	}
-
-	hashtable->entry_count = 0;
-}
-
-int hashtable_hash_fnv(void *key, int size)
-{
-	unsigned int hval = 0x811c9dc5;
-	unsigned char *bp = (unsigned char *)key;
-    unsigned char *be = bp + size;
-
-    while (bp < be) 
-	{
-		hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-		hval ^= (unsigned int)*bp++;
-    }
-
-    return (int)hval;
 }
