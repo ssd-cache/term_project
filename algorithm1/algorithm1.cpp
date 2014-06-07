@@ -261,7 +261,7 @@ struct output_entry larc(int reference)
 void algorithm1(char *sim_file, char *output)
     {
 		//test hash code
-		//foo();
+		foo();
 		//test_func();
 		//
         printf("this is the 1th algorithm\n");

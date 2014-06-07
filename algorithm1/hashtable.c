@@ -54,7 +54,7 @@ struct htab *addhash(char *key, char *data) {
 	}
 
 	hashval = hash(key);
-
+	//add into the linked list
 	if (hashtab[hashval] == NULL) {
 		hashtab[hashval] = newhash;
 		hashtab[hashval]->parent = NULL;
