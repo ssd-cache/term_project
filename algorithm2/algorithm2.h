@@ -1,3 +1,9 @@
+/* defentions */
+#define	BLOCK_ERASE 1500
+#define PAGE_READ 25
+#define PAGE_WRITE 200
+#define DATA_TRANS 13.65
+#define MEM_ACCESS_LATE 0.0025
 
 /* structures */
 struct Trace 
@@ -6,7 +12,6 @@ struct Trace
 	int size;
 	char* mode;
 	float time_stamp;
-	int pageOverage;
 };
 
 typedef struct InfoString
@@ -18,7 +23,8 @@ typedef struct InfoString
 typedef struct LB_Node
 {
 	int blockNum;
-	int cacheAddr;
+	int cacheAddr; // probably not going to need this with the page table now
+	int *pageTable;
 	int currNumOfPages;
 	int refBit;
 	LB_Node* next;
@@ -34,7 +40,7 @@ typedef struct LB_Clock
 	unsigned long blockPerCache;
 	int pagePerBlock;
 	int currBlockCount;
-	int *victimCandidateSet;
+	int *victimCandidateSet; // probably don't need this, but don't remove unitl sure
 	double timeStamp;
 	int timer;
 	int pageFaults;
@@ -49,22 +55,24 @@ void setStructSizes(InfoString *size, LB_Clock *lb_clock);
 void setBlockOfCache(LB_Clock *lb_clock);
 void setPageOfBlocks(LB_Clock *lb_clock);
 int getNumOfPages(Trace *tp, LB_Clock *lb_clock);
-int checkPageInBlock(int tempPage, Trace *tp, LB_Clock *lb_clock);
+int checkPageSize(Trace *tp, LB_Clock *lb_clock, LB_Node *np);
 int checkBlockInCache(Trace *tp, LB_Clock *lb_clock);
-void writeToCache(Trace *tp, LB_Clock *lb_clock);
+LB_Node* checkPagesInBlock(LB_Clock *lb_clock);
+void writeToCache(Trace *tp, LB_Clock *lb_clock); 
+void writeCacheBlock(Trace *tp, LB_Clock *lb_clock);
 void readFromCache(Trace *tp, LB_Clock *lb_clock);
-void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock);
+void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock, LB_Node* newNode);
 void replaceBlock(LB_Clock *lb_clock);
+void addPagesToCache(Trace *tp, LB_Clock *lb_clock, LB_Node *np);
 void updateBlockInCache(Trace *tp, LB_Clock *lb_clock);
 void updateClockHand(LB_Clock *lb_clock);
 int updateRefBit(LB_Clock *lb_clock);
 LB_Node* checkVictimSetWrite(LB_Clock *lb_clock);
 LB_Node* checkVictimSetRead(LB_Clock *lb_clock);
 void checkTicks(LB_Clock *lb_clock);
+void movePagesToNewBlock(Trace *tp, LB_Clock *lb_clock, LB_Node *currNode);
 
 void checkTraceMode(Trace *tp, LB_Clock *lb_clock);
 
-void testAlloc(LB_Clock *lb_clock);
-
 // from chi's code
-Trace* traceParser(char *trace_file, char* result, LB_Clock *lb_clock);
+void traceParser(char *trace_file, char* result, LB_Clock *lb_clock);
