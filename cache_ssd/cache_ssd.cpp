@@ -21,7 +21,7 @@ extern int cnt;
 void simulation(char *dat, char *file_name, SizeInfo *sizeArr)
     {
         printf("start running the simulation\n");
-		char *output = strcat(file_name, ".csv");
+		char *output = strcat(file_name, "_LB.csv");
         //algorithm1(dat, output);
 		algorithm2(dat, output, sizeArr);
 
@@ -32,7 +32,7 @@ void simulation(char *dat, char *file_name)
         printf("start running the simulation\n");
 		//algorithm2();
 		//algorithm3();
-		char *output = strcat(file_name, ".csv");
+		char *output = strcat(file_name, "_LARC.csv");
         algorithm1(dat, output);
 
     }
