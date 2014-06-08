@@ -49,7 +49,7 @@ struct htab *addhash(char *key, char *data) {
 	for (i = 0; i <= strlen(key); i++) {
 		newhash->key[i] = key[i];
 	}
-	for (i = 0; i <= strlen(key); i++) {
+	for (i = 0; i <= strlen(data); i++) {
 		newhash->data[i] = data[i];
 	}
 

@@ -11,6 +11,10 @@ struct trace {
 	char* mode;
 	float time_stamp;
 };
+struct sizeinfo{
+	int size;
+	char *attr;
+};
 
 struct SizeInfo
 {
