@@ -23,7 +23,6 @@ typedef struct InfoString
 typedef struct LB_Node
 {
 	int blockNum;
-	int cacheAddr; // probably not going to need this with the page table now
 	int *pageTable;
 	int currNumOfPages;
 	int refBit;
@@ -40,7 +39,6 @@ typedef struct LB_Clock
 	unsigned long blockPerCache;
 	int pagePerBlock;
 	int currBlockCount;
-	int *victimCandidateSet; // probably don't need this, but don't remove unitl sure
 	double timeStamp;
 	int timer;
 	int pageFaults;

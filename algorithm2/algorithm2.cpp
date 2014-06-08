@@ -68,7 +68,6 @@ void algorithm2(char *sim_file, char *output, void *arg)
 	free(lb_clock->blockSize.type);
 	free(lb_clock->cacheSize.type);
 	free(lb_clock->pageSize.type);
-	free(lb_clock->victimCandidateSet);
 	free(lb_clock);
 }
 
@@ -126,26 +125,12 @@ void setBlockOfCache(LB_Clock *lb_clock)
 	if(strcmp(lb_clock->cacheSize.type, lb_clock->blockSize.type) == 0)
 	{
 		lb_clock->blockPerCache = lb_clock->cacheSize.size / lb_clock->blockSize.size;
-		// allocating victim set to size of cache blocks
-		/* Don't think this is necessary, but wait to remove */
-		if(!(lb_clock->victimCandidateSet = (int*)malloc(lb_clock->blockPerCache * sizeof(int))))
-		{
-			printf("couldn't allocate memory for victim set array, exiting...");
-			exit(-1);
-		}
 	}
 	else
 	{
 		tempCache = getByteValue(&lb_clock->cacheSize);
 		tempBlock = getByteValue(&lb_clock->blockSize);
 		lb_clock->blockPerCache = tempCache/tempBlock;
-		// allocating victim set to size of cache blocks
-		/* Don't think I need this, but wait to remove until sure */
-		if(!(lb_clock->victimCandidateSet = (int*)malloc(lb_clock->blockPerCache * sizeof(int))))
-		{
-			printf("couldn't allocate memory for victim set array, exiting...");
-			exit(-1);
-		}
 	}
 	return;
 }
