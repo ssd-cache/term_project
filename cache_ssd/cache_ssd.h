@@ -11,6 +11,10 @@ struct trace {
 	char* mode;
 	float time_stamp;
 };
+struct sizeinfo{
+	int size;
+	char *attr;
+};
 
 void trace_parser(char *trace_file, char *result);
 void output_helper(struct output_entry input, char *output_file);

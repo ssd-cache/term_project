@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include "algorithm1.h"
-#include "algorithm2.h"
+#include <iostream>
+//#include "algorithm2.h"
 #include "algorithm3.h"
 #include <iostream>
 #include <string>
@@ -19,11 +20,18 @@ extern int cnt;
 void simulation(char *dat, char *file_name)
     {
         printf("start running the simulation\n");
-		algorithm2();
-		algorithm3();
+		//algorithm2();
+		//algorithm3();
 		char *output = strcat(file_name, ".csv");
         algorithm1(dat, output);
     }
+
+void simulation(char*dat, char *file_name, int input_size)
+{
+	printf("use the overload simulation for interactive mode\n");
+	char *output = strcat(file_name, ".csv");
+	//algorithm2(dat, output, input.size);
+}
 void output_helper(struct output_entry input, char* output_file)
     {
         printf("formatting the output into csv\n");
@@ -83,7 +91,7 @@ void trace_parser(char *trace_file, char* result)
 	}
 }
 
-int main(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	//get the list of the trace files
 	system("dir /b .\\trace\\ >file.txt");
@@ -101,7 +109,19 @@ int main(int argc, _TCHAR* argv[])
 			strcat(trace_dir, line);
 			strcpy(trace_file, trace_dir);
 			printf("the test dat is %s\n", trace_file);
-			simulation(trace_file,line);
+			sizeinfo input;
+			//non-input mode
+			if (argc == 1)
+			{
+				simulation(trace_file, line);
+			}
+			else
+			{
+				
+				input.size = atoi(argv[1]);
+				simulation(trace_file, line, input.size);
+				
+			}
 		}
 	}
 	return 0;

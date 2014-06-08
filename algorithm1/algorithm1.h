@@ -7,6 +7,9 @@
 #define HDD_ACCESS_SPEED 20
 //1G
 #define SIZE_OF_MEMORY 1073741824
+#define HASH_SEARCH 0
+#define LRU 1
+#define LARC 1
 
 
 
