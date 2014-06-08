@@ -27,12 +27,18 @@
     <ClInclude Include="cache_ssd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StringManip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cache_ssd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringManip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

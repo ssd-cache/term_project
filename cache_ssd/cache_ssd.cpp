@@ -3,9 +3,10 @@
 
 #include "stdafx.h"
 #include "algorithm1.h"
-#include <iostream>
-//#include "algorithm2.h"
+#include "algorithm2.h"
 #include "algorithm3.h"
+#include "StringManip.h"
+#include <iostream>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -17,13 +18,23 @@ extern int cnt;
 
 
 
+void simulation(char *dat, char *file_name, SizeInfo *sizeArr)
+    {
+        printf("start running the simulation\n");
+		char *output = strcat(file_name, "_LB.csv");
+        //algorithm1(dat, output);
+		algorithm2(dat, output, sizeArr);
+
+    }
+
 void simulation(char *dat, char *file_name)
     {
         printf("start running the simulation\n");
 		//algorithm2();
 		//algorithm3();
-		char *output = strcat(file_name, ".csv");
+		char *output = strcat(file_name, "_LARC.csv");
         algorithm1(dat, output);
+
     }
 
 void simulation(char*dat, char *file_name, int input_size)
@@ -45,6 +56,43 @@ void output_helper(struct output_entry input, char* output_file)
 		fclose(f);
 		
     }
+
+void getSizeInput(SizeInfo *sizeArr)
+{
+	// local varaibles
+	char tempInput[1024];
+
+	// get sizes needed for project
+	for(int i=0; i<3; i++)
+	{
+		if(i == 0)
+		{
+			printf("Enter cache size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr[0]);
+		}
+		else if(i == 1)
+		{
+			printf("Enter block size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr[1]);
+		}
+		else if(i == 2)
+		{
+			printf("Enter page size: ");
+			fgets(tempInput, sizeof(tempInput), stdin);
+			lowerCaseString(tempInput);
+			removeSpaces(tempInput);
+			splitInput(tempInput, &sizeArr[2]);
+		}
+		rewind(stdin);
+	}
+	return;
+}
 
 void trace_parser(char *trace_file, char* result)
 {
@@ -96,6 +144,11 @@ int main(int argc, char* argv[])
 	//get the list of the trace files
 	system("dir /b .\\trace\\ >file.txt");
 	FILE *file_list = fopen("file.txt", "r");
+	SizeInfo sizeArr[3];
+
+	// getting size info
+	getSizeInput(sizeArr);
+
 	if (file_list != NULL)
 	{
 		char line[128];
@@ -109,19 +162,22 @@ int main(int argc, char* argv[])
 			strcat(trace_dir, line);
 			strcpy(trace_file, trace_dir);
 			printf("the test dat is %s\n", trace_file);
-			sizeinfo input;
-			//non-input mode
-			if (argc == 1)
-			{
-				simulation(trace_file, line);
-			}
-			else
-			{
-				
-				input.size = atoi(argv[1]);
-				simulation(trace_file, line, input.size);
-				
-			}
+			simulation(trace_file, line);
+			simulation(trace_file,line, sizeArr);
+
+			//SizeInfo input;
+			////non-input mode
+			//if (argc == 1)
+			//{
+			//	simulation(trace_file, line);
+			//}
+			//else
+			//{
+			//	
+			//	input.size = atoi(argv[1]);
+			//	simulation(trace_file, line, input.size);
+			//	
+			//}
 		}
 	}
 	return 0;
