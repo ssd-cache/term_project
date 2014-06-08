@@ -82,7 +82,7 @@ void trace_parser(char *trace_file, char* result)
 			//page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;
 			output.time_stamp = sample.time_stamp;
 			//call the algorithm
-			output_entry temp = larc(page_idx);
+			output_entry temp = lru(page_idx);
 			output.page_fault = temp.page_fault;
 			output.hit_rate = temp.hit_rate;
 			output_helper(output, result);

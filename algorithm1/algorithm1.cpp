@@ -22,12 +22,14 @@ int page_ref[num_pages];
 int cnt_transfer = 0;
 
 //counters of queue of cache
-int q[4];
+//int q[4];
+int q[num_blocks];
 int ghost_q[3];
 int cnt = 0;
-int mru_cnt[4];
-int lru_cnt[4];
-
+//int mru_cnt[4];
+//int lru_cnt[4];
+int mru_cnt[num_blocks];
+int lru_cnt[num_blocks];
 //counters of ghost queue
 int g_cnt = 0;
 int g_mru_cnt[3];
@@ -89,7 +91,8 @@ struct output_entry lru(int reference)
 	}
 	if (!found)
 	{		
-		if (cnt < 4)
+		//if (cnt < 4)
+		if (cnt < num_blocks)
 		{
 			q[cnt] = reference;		
 			cnt++;
@@ -100,7 +103,8 @@ struct output_entry lru(int reference)
 			printf("The queue is full, will replace the old block\n");
 			page_fault++;			
 			//compare the mru cnt of the each block
-			for (int j = 0; j < 3; j++)
+			//for (int j = 0; j < 3; j++)
+			for (int j = 0; j < num_blocks-1; j++)
 			{
 				if (mru_cnt[j] < mru_cnt[j + 1])
 				{
@@ -137,11 +141,14 @@ struct output_entry lru(int reference)
 				}
 			}
 			//get the relaced block
-			printf("the block %d is replaced\n", q[3]);
-			q[3] = reference;
+			printf("the block %d is replaced\n", q[num_blocks-1]);
+			//q[3] = reference;
+			q[num_blocks - 1] = reference;
 			//set the mru cnt for the new block
-			mru_cnt[3] = 0;
-			lru_cnt[3] = 0;
+			//mru_cnt[3] = 0;
+			//lru_cnt[3] = 0;
+			mru_cnt[num_blocks-1] = 0;
+			lru_cnt[num_blocks-1] = 0;
 		}
 	}
 	//count the total of page fault
@@ -177,7 +184,8 @@ struct output_entry larc(int reference)
 	}
 	if (!found)
 	{
-		if (cnt < 4)
+		//if (cnt < 4)
+		if (cnt < num_blocks)
 		{
 			q[cnt] = reference;
 			cnt++;
@@ -363,9 +371,9 @@ void algorithm1(char *sim_file, char *output)
 		//test_func();
 		//
         printf("this is the 1th algorithm\n");
-		int q[4] = { 0 };
-		int mru_cnt[4] = { 0 };
-		int lru_cnt[4] = { 0 };
+		int q[num_blocks] = { 0 };
+		int mru_cnt[num_blocks] = { 0 };
+		int lru_cnt[num_blocks] = { 0 };
 		int cnt = 0;
 		page_fault = 0;
 		hit_cnt = 0;
