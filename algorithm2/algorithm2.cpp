@@ -75,7 +75,7 @@ void algorithm2(char *sim_file, char *output, void *arg)
 LB_Clock* initClock()
 {
 	// variables
-	clock_t t = clock();
+	clock_t t = clock(); // move to a different spot so intial tick comparison isn't so large
 
 	// inti struct
 	LB_Clock *clock = (LB_Clock*)malloc(sizeof(LB_Clock));
@@ -127,6 +127,7 @@ void setBlockOfCache(LB_Clock *lb_clock)
 	{
 		lb_clock->blockPerCache = lb_clock->cacheSize.size / lb_clock->blockSize.size;
 		// allocating victim set to size of cache blocks
+		/* Don't think this is necessary, but wait to remove */
 		if(!(lb_clock->victimCandidateSet = (int*)malloc(lb_clock->blockPerCache * sizeof(int))))
 		{
 			printf("couldn't allocate memory for victim set array, exiting...");
@@ -139,6 +140,7 @@ void setBlockOfCache(LB_Clock *lb_clock)
 		tempBlock = getByteValue(&lb_clock->blockSize);
 		lb_clock->blockPerCache = tempCache/tempBlock;
 		// allocating victim set to size of cache blocks
+		/* Don't think I need this, but wait to remove until sure */
 		if(!(lb_clock->victimCandidateSet = (int*)malloc(lb_clock->blockPerCache * sizeof(int))))
 		{
 			printf("couldn't allocate memory for victim set array, exiting...");
@@ -188,27 +190,53 @@ int getNumOfPages(Trace *tp, LB_Clock *lb_clock)
 	tempBytes1 = (int)getByteValue(&temp);
 	tempBytes2 = (int)getByteValue(&lb_clock->pageSize);
 
+	// check for uneven divisions here
 	tempPages = tempBytes1 / tempBytes2;
-
-	tempPages = checkPageInBlock(tempPages, tp, lb_clock);
-
+	if(tempBytes1 % tempBytes2 > 1)
+	{
+		tempPages += 1;
+	}
 	// free temp allocated string
 	free(temp.type);
 
 	return tempPages;
 }
 
-int checkPageInBlock(int tempPage, Trace *tp, LB_Clock *lb_clock)
+int checkPageSize(Trace *tp, LB_Clock *lb_clock, LB_Node *np)
 {
-	if(tempPage > lb_clock->pagePerBlock)
+	// variables
+	int pagesNeeded = getNumOfPages(tp, lb_clock);
+	int overage = 0;
+
+	if(pagesNeeded > lb_clock->pagePerBlock - np->currNumOfPages)
 	{
-		tp->pageOverage = lb_clock->pagePerBlock - tempPage;
-		tempPage = lb_clock->pagePerBlock;
+		overage = pagesNeeded;
 	}
-	return tempPage;
+	return overage;
 }
 
-// check if 
+LB_Node* checkPagesInBlock(LB_Clock *lb_clock)
+{
+	// variables
+	LB_Node *tempNode = NULL;
+
+	if(lb_clock->clockStart != NULL)
+	{
+		tempNode = lb_clock->clockStart;
+
+		while(tempNode->next != lb_clock->clockStart)
+		{
+			if(tempNode->currNumOfPages < lb_clock->pagePerBlock)
+			{
+				break;
+			}
+			tempNode = tempNode->next;
+		}
+	}
+	return tempNode;
+}
+
+// think of changing function name to check page in cache
 int checkBlockInCache(Trace *tp, LB_Clock *lb_clock)
 {
 	// variables
@@ -220,9 +248,14 @@ int checkBlockInCache(Trace *tp, LB_Clock *lb_clock)
 	{
 		while(currNode->next != lb_clock->clockStart)
 		{
-			if(currNode->cacheAddr == atoi(tp->addr))
+			// added this to loop through filled pages of cache block
+			for(int i=0; i<currNode->currNumOfPages; i++) 
 			{
-				found = 1;
+				if(currNode->pageTable[i] == atoi(tp->addr)/lb_clock->pagePerBlock)
+				{
+					// could have issues with this if size overflows to second block
+					found = 1;
+				}
 			}
 			currNode = currNode->next;
 		}
@@ -231,11 +264,12 @@ int checkBlockInCache(Trace *tp, LB_Clock *lb_clock)
 }
 
 // writing to cache
-void writeToCache(Trace *tp, LB_Clock *lb_clock)
+//void writeToCache(Trace *tp, LB_Clock *lb_clock)// change to write cache block
+void writeCacheBlock(Trace *tp, LB_Clock *lb_clock)
 {
 	// variables
 	LB_Node *insertNode, *currNode;
-	int numOfPagesNeeded;
+	
 
 	// safety check so we don't run out of memory
 	if((insertNode = (LB_Node*)malloc(sizeof(LB_Node))) == NULL)
@@ -243,11 +277,16 @@ void writeToCache(Trace *tp, LB_Clock *lb_clock)
 		printf("Can malloc that many nodes, exiting...");
 		exit(-1);
 	}
+	// allocating page table array
+	if(!(insertNode->pageTable = (int*)malloc(lb_clock->pagePerBlock * sizeof(int))))
+	{
+		printf("couldn't allocate memory for page table array, exiting...");
+		exit(-1);
+	}
 	insertNode->blockNum = lb_clock->currBlockCount;
-	insertNode->cacheAddr = atoi(tp->addr);
-	// checking for number of pages needed for the block
-	numOfPagesNeeded = getNumOfPages(tp, lb_clock);
-	insertNode->currNumOfPages = numOfPagesNeeded;
+	insertNode->currNumOfPages = 0;
+	//test adding pages to cache
+	addPagesToCache(tp, lb_clock, insertNode);
 	insertNode->refBit = 1;
 
 	//testing for where to insert new node
@@ -288,7 +327,8 @@ void writeToCache(Trace *tp, LB_Clock *lb_clock)
 	else
 	{
 		// here is where you evict block
-		evictBlockFromCache(tp, lb_clock);
+		evictBlockFromCache(tp, lb_clock, insertNode);
+		// need to make currNode blockNum == evitBlock blockNum
 	}
 	return;
 }
@@ -305,28 +345,114 @@ void updateBlockInCache(Trace *tp, LB_Clock *lb_clock)
 	{
 		while(currNode->next != lb_clock->clockStart)
 		{
-			if(currNode->cacheAddr == atoi(tp->addr))
+			for(int i=0; i<currNode->currNumOfPages; i++)
 			{
-				// set hit in lb_clock
-				pageNumCheck = getNumOfPages(tp, lb_clock);
-				if(pageNumCheck == currNode->currNumOfPages)
+				if(currNode->pageTable[i] == atoi(tp->addr)/lb_clock->pagePerBlock)
 				{
-					currNode->refBit = 1;
-					printf("cache hit, already in cache, block address = %s, size = %d bytes\n", currNode->cacheAddr, tp->size);
-				}
-				else
-				{
-					currNode->refBit = 0;
-					//lb_clock->timeStamp += dataTransTime;
-					// dirty needs to be written back to disk
-					// need to test if new size will fit in block
-					// decided what to do if not...
-					printf("cache hit, writting to block address = %s, size = %d bytes\n", currNode->cacheAddr, tp->size);
+					pageNumCheck = getNumOfPages(tp, lb_clock);
+					if(pageNumCheck == currNode->currNumOfPages)
+					{
+						currNode->refBit = 1;
+						printf("cache hit, already in cache, page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+						break;
+					}
+					else
+					{
+						// dirty needs to be written back to disk
+						printf("cache hit, updating page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+						currNode->refBit = 1;
+						pageNumCheck = checkPageSize(tp, lb_clock, currNode);
+						if(currNode->currNumOfPages < lb_clock->pagePerBlock && pageNumCheck == 0)
+						{
+							addPagesToCache(tp, lb_clock, currNode);
+							// adding to time stamp
+							lb_clock->timeStamp += (DATA_TRANS + MEM_ACCESS_LATE);
+							break;
+							//goto End;
+						}
+						else
+						{
+							movePagesToNewBlock(tp, lb_clock, currNode);
+							// adding to time stamp
+							lb_clock->timeStamp += (DATA_TRANS + MEM_ACCESS_LATE);
+							break;
+							//goto End;
+						}
+						//lb_clock->timeStamp += dataTransTime;
+					}
 				}
 			}
 			currNode = currNode->next;
 		}
 	}
+	//End:
+	return;
+}
+
+void movePagesToNewBlock(Trace *tp, LB_Clock *lb_clock, LB_Node *currNode)
+{
+	// variables
+	int pages;
+	LB_Node *moveNode = lb_clock->clockStart;
+
+	while(moveNode->next != lb_clock->clockStart)
+	{
+		pages = checkPageSize(tp, lb_clock, moveNode);
+		if(moveNode->currNumOfPages < lb_clock->pagePerBlock && pages == 0)
+		{
+			break;
+		}
+		moveNode = moveNode->next;
+	}
+
+	
+	if(lb_clock->currBlockCount == lb_clock->blockPerCache && moveNode->next == lb_clock->clockStart)
+	{
+		pages = checkPageSize(tp, lb_clock, moveNode);
+		if(pages > 0)
+		{
+			writeCacheBlock(tp, lb_clock);
+			moveNode = NULL;
+		}
+	}
+
+	for(int i=0; i<currNode->currNumOfPages; i++)
+	{
+		if(currNode->pageTable[i] == atoi(tp->addr)/lb_clock->pagePerBlock)
+		{
+			currNode->pageTable[i] = -1;
+			//currNode->currNumOfPages--;
+		}
+	}
+
+	if(moveNode != NULL)
+	{
+		addPagesToCache(tp, lb_clock, moveNode);
+	}
+}
+
+void addPagesToCache(Trace *tp, LB_Clock *lb_clock, LB_Node *np)
+{
+	// variables
+	int numOfPagesNeeded;
+	int cacheAddr;
+
+	cacheAddr = atoi(tp->addr)/lb_clock->pagePerBlock;
+	// checking for number of pages needed for the block
+	numOfPagesNeeded = getNumOfPages(tp, lb_clock);
+
+	// functions
+	for(int i=np->currNumOfPages; i<numOfPagesNeeded+np->currNumOfPages; i++)
+	{
+		np->pageTable[i] = cacheAddr;
+		// might want to do add MEM_ACCESS_LATE
+	}
+	np->currNumOfPages += numOfPagesNeeded;
+
+	// updateing time stamp
+	lb_clock->timeStamp += PAGE_WRITE;
+
+	printf("writing to cache, page address = %d, size = %d bytes\n", cacheAddr, tp->size);
 	return;
 }
 
@@ -341,12 +467,16 @@ void readFromCache(Trace *tp, LB_Clock *lb_clock)
 	{
 		while(currNode->next != lb_clock->clockStart)
 		{
-			if(currNode->cacheAddr == atoi(tp->addr))
+			for(int i=0; i<lb_clock->currBlockCount; i++)
 			{
-				// set hit in lb_clock
-				//lb_clock;
-				//lb_clock->timeStamp += hitTime;
-				printf("cache hit,reading from block address = %s, size = %d bytes\n", currNode->cacheAddr, tp->size);
+				if(currNode->pageTable[i] == atoi(tp->addr)/lb_clock->pagePerBlock)
+				{
+					currNode->refBit = 1;
+					//lb_clock->timeStamp += hitTime;
+					printf("cache hit,reading from page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+					lb_clock->timeStamp += (PAGE_READ + MEM_ACCESS_LATE);
+					break;
+				}
 			}
 			currNode = currNode->next;
 		}
@@ -354,56 +484,115 @@ void readFromCache(Trace *tp, LB_Clock *lb_clock)
 	return;
 }
 
-void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock)
+void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock, LB_Node *newNode)
 {
 	// variables
-	LB_Node *currNode, *PrevNode, *evictNode;
+	LB_Node *evictNode, *lastNode;
 
 	// functions
-	if(strcmp(tp->mode, "W") == 0)
+	if(strcmp(tp->mode, "w") == 0)
 	{
-		// have to go with most pages in block and ref bit zero
 		evictNode = checkVictimSetWrite(lb_clock);
 	}
 	else
 	{
-		// have to go with middle pages in block and ref bit zero
-		//  !!! think on this !!!
 		evictNode = checkVictimSetRead(lb_clock);
-
+	}
+	if(evictNode == lb_clock->clockStart)
+	{
+		lastNode = evictNode;
+		while(lastNode->next != lb_clock->clockStart)
+		{
+			lastNode = lastNode->next;
+		}
+		newNode->blockNum = evictNode->blockNum;
+		newNode->next = evictNode->next;
+		lastNode->next = newNode;
+		lb_clock->clockStart = newNode;
+	}
+	else
+	{
+		lastNode = lb_clock->clockStart;
+		while(lastNode->next != evictNode)
+		{
+			lastNode = lastNode->next;
+		}
+		newNode->blockNum = evictNode->blockNum;
+		newNode->next = evictNode->next;
+		lastNode->next = newNode;
 	}
 
+	// freeing evicted block
+	free(evictNode->pageTable);
+    free(evictNode);
+
+	// adding to time stamp
+	lb_clock->timeStamp += BLOCK_ERASE;
 	return;
 }
 
 void checkTraceMode(Trace *tp, LB_Clock *lb_clock)
 {
-	if(strcmp(tp->mode, "W") == 0)
+	// variables
+	LB_Node *tempNode;
+	int testNum;
+
+	if(strcmp(tp->mode, "w") == 0)
 	{
 		// check if in cache already
 		// if not
 		if(checkBlockInCache(tp, lb_clock) != 1)
 		{
-			writeToCache(tp, lb_clock);
-			lb_clock->pageFaults++;
+			tempNode = checkPagesInBlock(lb_clock);
+			if(tempNode != NULL)
+			{
+				testNum = checkPageSize(tp, lb_clock, tempNode);
+			}
+			if(tempNode != NULL && tempNode->currNumOfPages < lb_clock->pagePerBlock && testNum == 0)
+			{
+				addPagesToCache(tp, lb_clock, tempNode);
+				lb_clock->pageFaults++;
+			}
+			else
+			{
+				//OverageCheck:
+				writeCacheBlock(tp, lb_clock);
+				lb_clock->pageFaults++;
+			}
 		}
 		else
 		{
 			updateBlockInCache(tp, lb_clock);
+			lb_clock->cacheHit++;
 		}
 	}
-	else if(strcmp(tp->mode, "R") == 0)
+	else if(strcmp(tp->mode, "r") == 0)
 	{
 		// check if in cache already
 		//if is
 		if(checkBlockInCache(tp, lb_clock) != 1)
 		{
-			writeToCache(tp, lb_clock);
-			lb_clock->pageFaults++;
+			tempNode = checkPagesInBlock(lb_clock);
+			if(tempNode != NULL)
+			{
+				testNum = checkPageSize(tp, lb_clock, tempNode);
+			}
+			if(tempNode != NULL && tempNode->currNumOfPages < lb_clock->pagePerBlock && testNum == 0)
+			{
+			
+				addPagesToCache(tp, lb_clock, tempNode);
+				lb_clock->pageFaults++;
+			}
+			else
+			{
+				writeCacheBlock(tp, lb_clock);// change to write cache block
+				lb_clock->pageFaults++;
+			}
 		}
 		else
 		{
 			readFromCache(tp, lb_clock);
+			lb_clock->cacheHit++;
 		}
 	}
 	return;
@@ -413,79 +602,58 @@ LB_Node* checkVictimSetWrite(LB_Clock *lb_clock)
 {
 	// variables
 	int evictBlock;
-	LB_Node *evictNodeA, *evictNodeB, *finalEvictNode, *currNode;
+	LB_Node *evictNode, *currNode, *nextNode;
 	int reset;
 
+	// so there is always something to evict
+	evictNode = lb_clock->clockHand;
 	currNode = lb_clock->clockHand;
-	evictNodeA = NULL;
-	evictNodeB = NULL;
+	nextNode = currNode->next;
 
 	while(currNode->next != lb_clock->clockHand)
 	{
 		// think about logic here.....test
-		if(currNode->refBit == 0)
+		if(currNode->currNumOfPages >= nextNode->currNumOfPages)
 		{
-			if(evictNodeB == NULL)
+			if(currNode->refBit == 0 && currNode->currNumOfPages == lb_clock->pagePerBlock)
 			{
-				evictNodeB = evictNodeA;
-			}
-			evictNodeA = currNode;
-		}
-		if(evictNodeA != NULL && evictNodeB != NULL)
-		{
-			if(evictNodeB->currNumOfPages < evictNodeA->currNumOfPages)
-			{
-				finalEvictNode = evictNodeA;
-				// testing to see if this holds for reseting victim set
-				// that was evicted
-				//reset = j-1;
+				evictNode = currNode;
+				break;
 			}
 		}
 		currNode = currNode->next;
 	}
-
-
-	//evictNodeFromCache
-	return finalEvictNode;
+	lb_clock->clockHand = lb_clock->clockHand->next;
+	return evictNode;
 }
 
 LB_Node* checkVictimSetRead(LB_Clock *lb_clock)
 {
 	// variables
 	int evictBlock;
-	LB_Node *evictNodeA, *evictNodeB, *finalEvictNode, *currNode;
+	LB_Node *evictNode, *currNode, *nextNode;
 	int reset;
 
-	currNode = lb_clock->clockStart;
+	// so theres always someone to evict
+	evictNode = lb_clock->clockHand;
+	currNode = lb_clock->clockHand;
+	nextNode = currNode->next;
 
-	while(currNode->next != lb_clock->clockStart)
+	while(currNode->next != lb_clock->clockHand)
 	{
-		for(int j=1; j < lb_clock->blockPerCache; j++)
+		// think about logic here.....test
+		if(currNode->currNumOfPages <= nextNode->currNumOfPages)
 		{
-			if(currNode->blockNum == lb_clock->victimCandidateSet[j-1])
+			if(currNode->refBit == 0 && currNode->currNumOfPages <= lb_clock->pagePerBlock)
 			{
-				evictNodeA = currNode;
-			}
-			if(currNode->blockNum == lb_clock->victimCandidateSet[j])
-			{
-				evictNodeB = currNode;
-			}
-			if(evictNodeA != NULL && evictNodeB != NULL)
-			{
-				if(evictNodeB->currNumOfPages > evictNodeA->currNumOfPages)
-				{
-					finalEvictNode = evictNodeA;
-					// testing to see if this holds for reseting victim set
-					// that was evicted
-					reset = j-1;
-				}
+				evictNode = currNode;
+				break;
 			}
 		}
 		currNode = currNode->next;
 	}
-
-	//evictNodeFromCache
-	return finalEvictNode;
+	lb_clock->clockHand = lb_clock->clockHand->next;
+	return evictNode;
 }
 
 void checkTicks(LB_Clock *lb_clock)
@@ -530,6 +698,7 @@ int updateRefBit(LB_Clock *lb_clock)
 			}
 			currNode = currNode->next;
 		}
+		currNode->refBit == 0;
 	}
 	return updated;
 }
@@ -537,13 +706,13 @@ int updateRefBit(LB_Clock *lb_clock)
 ///////////////////////////////////////////
 //	parser from chi's algorithm 1 code	//
 /////////////////////////////////////////
-Trace* traceParser(char *trace_file, char* result, LB_Clock *lb)
+void traceParser(char *trace_file, char* result, LB_Clock *lb)
 {
 	FILE * trace_f;
 	int i;
 	int page_idx;
 	char *p;
-	char *array[10];
+	char *array[5];
 	Trace sample;
 	output_entry output;
 	int cnt = 0;
@@ -563,23 +732,20 @@ Trace* traceParser(char *trace_file, char* result, LB_Clock *lb)
 				array[i++] = p;
 				p = strtok(NULL, ",");
 			}			
-			sample.addr = array[1];
-			sample.size = atoi(array[2]);
-			sample.mode = array[3];
-			sample.time_stamp = atof(array[4]);
+			sample.addr = array[0];
+			sample.size = atoi(array[1]);
+			sample.mode = array[2];
+			sample.time_stamp = atof(array[3]);
 			checkTraceMode(&sample, lb);
 			checkTicks(lb);
-
-			//page_ref[cnt_transfer] = atoi(sample.addr);
-			//page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;	
-			//output.time_stamp = sample.time_stamp;
-			//output.page_fault = lru(page_idx).page_fault;
-			//output.hit_rate = lru(page_idx).hit_rate;
-			//output_helper(output, result);
+			output.time_stamp = sample.time_stamp;
+			output.page_fault = lb->pageFaults;
+			output.hit_rate = lb->cacheHit;
+			output_helper(output, result);
 		}
 		fclose(trace_f);
 	}
-	return &sample;
+	return;
 }
 
 
