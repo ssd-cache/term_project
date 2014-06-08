@@ -22,7 +22,8 @@ void simulation(char *dat, char *file_name, SizeInfo *sizeArr)
     {
         printf("start running the simulation\n");
 		char *output = strcat(file_name, "_LB.csv");
-        //algorithm1(dat, output);
+		algorithm2(dat, output, sizeArr);
+		//char *output = strcat(file_name, "_LBV2.csv");
 		algorithm2(dat, output, sizeArr);
 
     }
@@ -30,10 +31,10 @@ void simulation(char *dat, char *file_name, SizeInfo *sizeArr)
 void simulation(char *dat, char *file_name)
     {
         printf("start running the simulation\n");
-		//algorithm2();
 		//algorithm3();
-		char *output = strcat(file_name, "_LARC.csv");
+		char *output = strcat(file_name, ".csv");
         algorithm1(dat, output);
+		algorithm2(dat, output);
 
     }
 
@@ -147,7 +148,7 @@ int main(int argc, char* argv[])
 	SizeInfo sizeArr[3];
 
 	// getting size info
-	getSizeInput(sizeArr);
+	//getSizeInput(sizeArr);
 
 	if (file_list != NULL)
 	{
@@ -163,7 +164,7 @@ int main(int argc, char* argv[])
 			strcpy(trace_file, trace_dir);
 			printf("the test dat is %s\n", trace_file);
 			simulation(trace_file, line);
-			simulation(trace_file,line, sizeArr);
+			//simulation(trace_file,line, sizeArr);
 
 			//SizeInfo input;
 			////non-input mode
