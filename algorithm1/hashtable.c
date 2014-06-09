@@ -12,10 +12,7 @@ unsigned int hash(char *s) {
 	unsigned int hashval;
 	unsigned int ival;
 	char *p;			// p lets us reference the integer value as a
-	// character array instead of an integer.  This
-	// is actually pretty bad style even though it
-	// works.  You should try a union if you know
-	// how to use them.
+
 
 	p = (char *)&ival;		// Make p point to i, without the type cast you					// should get a warning.
 

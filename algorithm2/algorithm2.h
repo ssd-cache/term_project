@@ -5,6 +5,15 @@
 #define DATA_TRANS 13.65
 #define MEM_ACCESS_LATE 0.0025
 
+// these shouldn't be hardcoded!!!!
+#define CACHE_SIZE 4
+#define BLOCK_SIZE 128
+#define PAGE_SIZE 2
+// sizes
+#define KB "kb"
+#define MB "mb"
+#define GB "gb"
+
 /* structures */
 struct Trace 
 {
@@ -46,7 +55,9 @@ typedef struct LB_Clock
 }LB_Clock;
 
 /* functions */
+void algorithm2(char *sim_file, char *output);
 void algorithm2(char *sim_file, char *output, void *arg);
+void algorithm2_5(char *sim_file, char *output, void *arg);
 
 LB_Clock* initClock();
 void setStructSizes(InfoString *size, LB_Clock *lb_clock);
@@ -74,3 +85,4 @@ void checkTraceMode(Trace *tp, LB_Clock *lb_clock);
 
 // from chi's code
 void traceParser(char *trace_file, char* result, LB_Clock *lb_clock);
+void traceParser2_5(char *trace_file, char* result, LB_Clock *lb_r, LB_Clock* lb_w);
