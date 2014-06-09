@@ -6,10 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
 #include "algorithm1.h"
 #include "cache_ssd.h"
 #include "hash.h"
+
 
 using namespace std;
 
@@ -165,7 +166,8 @@ struct output_entry larc(int reference)
 	output_entry stat;
 	reference_cnt++;
 	g_found = false;
-
+	float search_time;
+	const clock_t begin_time = clock();
 	//first fill the Q
 	reference_cnt++;
 	found = false;
@@ -182,6 +184,7 @@ struct output_entry larc(int reference)
 			break;
 		}
 	}
+	
 	if (!found)
 	{
 		//if (cnt < 4)
@@ -226,6 +229,7 @@ struct output_entry larc(int reference)
 
 					if (findhash(value) != NULL)
 					{
+						printf("%f\n", float(clock() - begin_time) / CLOCKS_PER_SEC);
 						g_found = true;
 						//move it into the Q
 						q[sizeof(q) / sizeof(int)-1] = reference;
@@ -233,6 +237,7 @@ struct output_entry larc(int reference)
 					else
 					{
 						//lru replacement in ghost queue
+						printf("%f\n", float(clock() - begin_time) / CLOCKS_PER_SEC);
 						for (int j = 0; j < 2; j++)
 						{
 							if (g_mru_cnt[j] < g_mru_cnt[j + 1])
@@ -288,12 +293,13 @@ struct output_entry larc(int reference)
 					if (ghost_q[i] == reference)
 					{
 						//move it into the q
+						printf("%f\n", float(clock() - begin_time) / CLOCKS_PER_SEC);
 						q[sizeof(q) / sizeof(int)-1] = reference;
 						g_found = true;
 						break;
 					}
 				}
-
+				printf("%f\n", float(clock() - begin_time) / CLOCKS_PER_SEC);
 				if (!g_found)
 				{
 					if (g_cnt < 3)

@@ -32,6 +32,7 @@ void simulation(char *dat, char *file_name)
         printf("start running the simulation\n");
 		//algorithm2();
 		//algorithm3();
+
 		char *output = strcat(file_name, "_LARC.csv");
         algorithm1(dat, output);
 
@@ -45,7 +46,7 @@ void simulation(char*dat, char *file_name, int input_size)
 }
 void output_helper(struct output_entry input, char* output_file)
     {
-        printf("formatting the output into csv\n");
+        //printf("formatting the output into csv\n");
 		FILE *f = fopen(output_file, "a");
 		if (f == NULL)
 		{
@@ -112,7 +113,7 @@ void trace_parser(char *trace_file, char* result)
 		{
 			i = 0;
 
-			fputs(line, stdout);
+			//fputs(line, stdout);
 			//split the line into the struct
 			p = strtok(line, ",");
 			while (p != NULL)
@@ -130,7 +131,7 @@ void trace_parser(char *trace_file, char* result)
 			//page_idx = atoi(sample.addr) / CACHE_LINE_SIZE;
 			output.time_stamp = sample.time_stamp;
 			//call the algorithm
-			output_entry temp = lru(page_idx);
+			output_entry temp = larc(page_idx);
 			output.page_fault = temp.page_fault;
 			output.hit_rate = temp.hit_rate;
 			output_helper(output, result);
@@ -147,7 +148,7 @@ int main(int argc, char* argv[])
 	SizeInfo sizeArr[3];
 
 	// getting size info
-	getSizeInput(sizeArr);
+	//getSizeInput(sizeArr);
 
 	if (file_list != NULL)
 	{
@@ -163,7 +164,7 @@ int main(int argc, char* argv[])
 			strcpy(trace_file, trace_dir);
 			printf("the test dat is %s\n", trace_file);
 			simulation(trace_file, line);
-			simulation(trace_file,line, sizeArr);
+			//simulation(trace_file,line, sizeArr);
 
 			//SizeInfo input;
 			////non-input mode
