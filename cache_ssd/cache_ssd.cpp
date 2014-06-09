@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 			strcpy(trace_file, trace_dir);
 			printf("the test dat is %s\n", trace_file);
 			simulation(trace_file, line);
-			simulation(trace_file,line, sizeArr);
+			//simulation(trace_file,line, sizeArr);
 
 			//SizeInfo input;
 			////non-input mode
