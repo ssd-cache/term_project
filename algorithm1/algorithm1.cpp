@@ -2,14 +2,15 @@
 //
 
 #include "stdafx.h"
+#include "algorithm1.h"
+#include "cache_ssd.h"
+#include "hash.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "algorithm1.h"
-#include "cache_ssd.h"
-#include "hash.h"
+
 
 
 using namespace std;
@@ -37,7 +38,7 @@ int g_mru_cnt[3];
 int g_lru_cnt[3];
 bool g_found = false;
 
-int page_fault = 0;
+static int page_fault = 0;
 int reference_cnt = 0;
 int hit_cnt = 0;
 bool found = false;

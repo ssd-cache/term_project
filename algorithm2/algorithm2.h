@@ -6,9 +6,9 @@
 #define MEM_ACCESS_LATE 0.0025
 
 // these shouldn't be hardcoded!!!!
-#define CACHE_SIZE 4
+#define CACHE 4
 #define BLOCK_SIZE 128
-#define PAGE_SIZE 2
+#define PAGE_SIZE 4
 // sizes
 #define KB "kb"
 #define MB "mb"

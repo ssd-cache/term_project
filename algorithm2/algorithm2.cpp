@@ -30,7 +30,7 @@ void algorithm2(char *sim_file, char *output)
 
 	
 	// setting sizes for struct of clock
-	lb_clock->cacheSize.size = CACHE_SIZE;
+	lb_clock->cacheSize.size = CACHE;
 	if(!(lb_clock->cacheSize.type = (char*)malloc(4)))
 	{
 		printf("couldn't allocated memory for cache size type, exiting...");
@@ -819,7 +819,7 @@ void checkTicks(LB_Clock *lb_clock)
 		// reset ref bits in  clock
 		updateRefBit(lb_clock);
 	}
-	printf("\ntesting clock tick as timer = %d\n\n", ticks);
+	//printf("\ntesting clock tick as timer = %d\n\n", ticks);
 	return;
 }
 
