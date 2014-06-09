@@ -171,19 +171,6 @@ int main(int argc, char* argv[])
 			simulation(trace_file, line);
 			//simulation(trace_file,line, sizeArr);
 
-			//SizeInfo input;
-			////non-input mode
-			//if (argc == 1)
-			//{
-			//	simulation(trace_file, line);
-			//}
-			//else
-			//{
-			//	
-			//	input.size = atoi(argv[1]);
-			//	simulation(trace_file, line, input.size);
-			//	
-			//}
 		}
 	}
 	return 0;
