@@ -92,7 +92,8 @@ struct output_entry lru(int reference)
 		}		
 	}
 	if (!found)
-	{		
+	{	
+		page_fault++; // testing movement of page faults
 		//if (cnt < 4)
 		if (cnt < num_blocks)
 		{
@@ -103,7 +104,7 @@ struct output_entry lru(int reference)
 		else
 		{
 			printf("The queue is full, will replace the old block\n");
-			page_fault++;			
+			//page_fault++;			
 			//compare the mru cnt of the each block
 			//for (int j = 0; j < 3; j++)
 			for (int j = 0; j < num_blocks-1; j++)
@@ -155,7 +156,9 @@ struct output_entry lru(int reference)
 	}
 	//count the total of page fault
 	stat.page_fault = page_fault;
-	stat.hit_rate = (float)hit_cnt / reference_cnt;
+	//stat.hit_rate = (float)hit_cnt / reference_cnt;
+	stat.hit_rate = hit_cnt;
+
 	return stat;
 
 }
@@ -363,7 +366,8 @@ struct output_entry larc(int reference)
 	
 	//count the total of page fault
 	stat.page_fault = page_fault;
-	stat.hit_rate = (float)hit_cnt / reference_cnt;
+	//stat.hit_rate = (float)hit_cnt / reference_cnt;
+	stat.hit_rate = hit_cnt;
 	return stat;
 
 }
