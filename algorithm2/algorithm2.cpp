@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+
+// FOR HARDCODED SIZES - STUPID!!!
 void algorithm2(char *sim_file, char *output)
 {
 	// local variables
@@ -23,7 +25,6 @@ void algorithm2(char *sim_file, char *output)
     printf("this is the Long Block Clock (LB-Clock) algorithm\n");
 	// chi's test stuff
 	printf("using the test file %s\n", sim_file);
-    printf("output the result to %s\n", output);
 
 	// initializing struct
 	lb_clock = initClock();
@@ -62,11 +63,108 @@ void algorithm2(char *sim_file, char *output)
 	// parse the file
 	traceParser(sim_file, output, lb_clock);
 
+	// output file
+	printf("output the result to %s\n", output);
+
 	// freeing memory
 	free(lb_clock->blockSize.type);
 	free(lb_clock->cacheSize.type);
 	free(lb_clock->pageSize.type);
 	free(lb_clock);
+}
+
+// FOR HARDCODED SIZES - STUPID!!!
+void algorithm2_5(char *sim_file, char *output)
+{
+	// local variables
+	InfoString *temp;
+	LB_Clock* lb_write = NULL;
+	LB_Clock* lb_read = NULL;
+	char tempInput[1024];
+
+	// simple print information about the input/ output & algo
+    printf("this is the Long Block Clock (LB-Clock) algorithm Version 2\n");
+	// chi's test stuff
+	printf("using the test file %s\n", sim_file);
+
+	// initializing struct
+	lb_write = initClock();
+	lb_read = initClock();
+
+	
+	// setting sizes for WRITE clock
+	lb_write->cacheSize.size = CACHE / 2;
+	if(!(lb_write->cacheSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for cache size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_write->cacheSize.type, "mb");
+
+	lb_write->blockSize.size = BLOCK_SIZE;
+	if(!(lb_write->blockSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for block size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_write->blockSize.type, "kb");
+
+	lb_write->pageSize.size = PAGE_SIZE;
+	if(!(lb_write->pageSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for page size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_write->pageSize.type, "kb");
+
+	// setting sizes for READ clock
+	lb_read->cacheSize.size = CACHE / 2;
+	if(!(lb_read->cacheSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for cache size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_read->cacheSize.type, "mb");
+
+	lb_read->blockSize.size = BLOCK_SIZE;
+	if(!(lb_read->blockSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for block size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_read->blockSize.type, "lb");
+
+	lb_read->pageSize.size = PAGE_SIZE;
+	if(!(lb_read->pageSize.type = (char*)malloc(sizeof(4))))
+	{
+		printf("couldn't allocated memory for page size type, exiting...");
+		exit(-1);
+	}
+	strcpy(lb_read->pageSize.type, "kb");
+
+
+	// set number of blocks in cache and number of pages in blocks
+	setBlockOfCache(lb_write);
+	setPageOfBlocks(lb_write);
+	setBlockOfCache(lb_read);
+	setPageOfBlocks(lb_read);
+
+	// parse the file
+	traceParser(sim_file, output, lb_write);
+
+	// output
+	 printf("output the result to %s\n", output);
+
+	// freeing write
+	free(lb_write->blockSize.type);
+	free(lb_write->cacheSize.type);
+	free(lb_write->pageSize.type);
+	free(lb_write);
+	// read clock
+	free(lb_read->blockSize.type);
+	free(lb_read->cacheSize.type);
+	free(lb_read->pageSize.type);
+	free(lb_read);
 }
 
 void algorithm2(char *sim_file, char *output, void *arg)
@@ -81,7 +179,6 @@ void algorithm2(char *sim_file, char *output, void *arg)
     printf("this is the Long Block Clock (LB-Clock) algorithm\n");
 	// chi's test stuff
 	printf("using the test file %s\n", sim_file);
-    printf("output the result to %s\n", output);
 
 	// initializing struct
 	lb_clock = initClock();
@@ -125,6 +222,9 @@ void algorithm2(char *sim_file, char *output, void *arg)
 	// parse the file
 	traceParser(sim_file, output, lb_clock);
 
+	// output
+	 printf("output the result to %s\n", output);
+
 	// freeing memory
 	free(temp->type);
 	free(temp);
@@ -147,7 +247,6 @@ void algorithm2_5(char *sim_file, char *output, void *arg)
     printf("this is the Long Block Clock (LB-Clock) algorithm Version 2\n");
 	// chi's test stuff
 	printf("using the test file %s\n", sim_file);
-    printf("output the result to %s\n", output);
 
 	// initializing struct
 	lb_write = initClock();
@@ -218,6 +317,9 @@ void algorithm2_5(char *sim_file, char *output, void *arg)
 
 	// parse the file
 	traceParser(sim_file, output, lb_write);
+
+	// output
+	 printf("output the result to %s\n", output);
 
 	// freeing write
 	free(temp->type);
@@ -421,7 +523,7 @@ void writeCacheBlock(Trace *tp, LB_Clock *lb_clock)
 	// safety check so we don't run out of memory
 	if((insertNode = (LB_Node*)malloc(sizeof(LB_Node))) == NULL)
 	{
-		printf("Can malloc that many nodes, exiting...");
+		printf("can't malloc that many nodes, exiting...");
 		exit(-1);
 	}
 	// allocating page table array
@@ -469,7 +571,7 @@ void writeCacheBlock(Trace *tp, LB_Clock *lb_clock)
 				lb_clock->currBlockCount++;
 			}
 		}
-		printf("cache miss, writing to cache, block address = %s, size = %d bytes\n", tp->addr, tp->size);
+		printf("cache miss = %d, block number = %d\n", lb_clock->pageFaults, insertNode->blockNum);
 	}
 	else
 	{
@@ -500,13 +602,13 @@ void updateBlockInCache(Trace *tp, LB_Clock *lb_clock)
 					if(pageNumCheck == currNode->currNumOfPages)
 					{
 						currNode->refBit = 1;
-						printf("cache hit, already in cache, page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+						printf("cache hit = %d, page address = %d\n", lb_clock->cacheHit, currNode->pageTable[i]);
 						break;
 					}
 					else
 					{
 						// dirty needs to be written back to disk
-						printf("cache hit, updating page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+						printf("cache hit = %d, page address = %d\n",lb_clock->cacheHit, currNode->pageTable[i]);
 						currNode->refBit = 1;
 						pageNumCheck = checkPageSize(tp, lb_clock, currNode);
 						if(currNode->currNumOfPages < lb_clock->pagePerBlock && pageNumCheck == 0)
@@ -598,8 +700,6 @@ void addPagesToCache(Trace *tp, LB_Clock *lb_clock, LB_Node *np)
 
 	// updateing time stamp
 	lb_clock->timeStamp += PAGE_WRITE;
-
-	printf("writing to cache, page address = %d, size = %d bytes\n", cacheAddr, tp->size);
 	return;
 }
 
@@ -620,7 +720,7 @@ void readFromCache(Trace *tp, LB_Clock *lb_clock)
 				{
 					currNode->refBit = 1;
 					//lb_clock->timeStamp += hitTime;
-					printf("cache hit,reading from page address = %d, size = %d bytes\n", currNode->pageTable[i], tp->size);
+					printf("cache hit = %d, page address = %d\n", lb_clock->cacheHit, currNode->pageTable[i]);
 					lb_clock->timeStamp += (PAGE_READ + MEM_ACCESS_LATE);
 					break;
 				}
@@ -871,7 +971,7 @@ void traceParser(char *trace_file, char* result, LB_Clock *lb)
 		{
 			i = 0;
 			
-			fputs(line, stdout);
+			//fputs(line, stdout);
 			//split the line into the struct
 			p = strtok(line, ",");
 			while (p != NULL)
@@ -913,7 +1013,7 @@ void traceParser2_5(char *trace_file, char* result, LB_Clock *lb_r, LB_Clock* lb
 		{
 			i = 0;
 			
-			fputs(line, stdout);
+			//fputs(line, stdout);
 			//split the line into the struct
 			p = strtok(line, ",");
 			while (p != NULL)

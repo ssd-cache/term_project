@@ -56,6 +56,7 @@ typedef struct LB_Clock
 
 /* functions */
 void algorithm2(char *sim_file, char *output);
+void algorithm2_5(char *sim_file, char *output);
 void algorithm2(char *sim_file, char *output, void *arg);
 void algorithm2_5(char *sim_file, char *output, void *arg);
 

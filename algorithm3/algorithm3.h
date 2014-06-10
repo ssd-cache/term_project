@@ -9,3 +9,4 @@
 //#define SIZE_OF_MEMORY 1073741824
 
 void algorithm3(char *sim_file, char *output);
+struct output_entry aml(int pid, char* mode);

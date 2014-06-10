@@ -2,12 +2,14 @@
 //
 
 #include "stdafx.h"
-#include "algorithm3.h"
 #include "cache_ssd.h"
+#include "algorithm3.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+
 
 using namespace std;
 
@@ -25,6 +27,7 @@ const int BOUNDARY = 4;
 const int COOLMAX = 10;
 int count;
 static int page_fault = 0;
+static int cache_hit = 0; // Anthony added as test to see if we could get code running
 const int max_pages = SIZE_OF_MEMORY / CACHE_LINE_SIZE;
 int num_pages = max_pages/2;
 
@@ -138,7 +141,8 @@ void agePages()
 
 struct output_entry aml(int pid, char* mode)
 {
-	output_entry stat; // being used without being initialized !!!
+
+	output_entry stat;
 	page newPage;
 	newPage.coldFlag = 0;
 	newPage.id = pid;
@@ -160,6 +164,8 @@ struct output_entry aml(int pid, char* mode)
 			L1.erase(L1.begin()+i);
 			agePages();
 			found = true;
+			cache_hit++; // Anthony added as test to see if we could get code running
+			stat.hit_rate = cache_hit; // Anthony added as test to see if we could get code running
 		}
 	}
 
@@ -176,6 +182,7 @@ struct output_entry aml(int pid, char* mode)
 	
 		agePages();
 		page_fault++;
+		stat.page_fault = page_fault; // Anthony added as test to see if we could get code running
 	}
 
 	return stat;
