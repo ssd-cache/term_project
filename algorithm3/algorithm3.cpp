@@ -215,8 +215,8 @@ struct output_entry aml(int pid, char* mode)
 	
 		agePages();
 		page_fault++;
-		stat.page_fault = page_fault; // Anthony added as test to see if we could get code running
 	}
+	stat.page_fault = page_fault; // Anthony added as test to see if we could get code running
 	stat.hit_rate = (float)cache_hit / total_count;
 	return stat;
 }
@@ -374,8 +374,8 @@ struct output_entry aml3_5(int pid, char* mode)
 	
 		agePages();
 		page_fault++;
-		stat.page_fault = page_fault; // Anthony added as test to see if we could get code running
 	}
+	stat.page_fault = page_fault; // Anthony added as test to see if we could get code running
 	stat.hit_rate = (float)cache_hit / total_count;
 	return stat;
 }
