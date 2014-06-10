@@ -1059,6 +1059,13 @@ void traceParser2_5(char *trace_file, char* result, LB_Clock *lb_r, LB_Clock* lb
 
 		}
 		fclose(trace_f);
+				// write overall time stamp to output file
+		output.hit_rate = 0;
+		output.page_fault = 0;
+		output.time_stamp = lb_w->timeStamp;
+		output_helper(output, result);
+		output.time_stamp = lb_r->timeStamp;
+		output_helper(output, result);
 	}
 	return;
 }

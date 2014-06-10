@@ -34,9 +34,9 @@ void simulation(char *dat, char *file_name)
 		char *output = strcat(file_name, "_output.csv");
 
 		// algorithms
-        algorithm1(dat, output);
+        //algorithm1(dat, output);
 		algorithm2(dat, output);
-		algorithm2_5(dat, output);
+		//algorithm2_5(dat, output);
 		//algorithm3(dat, output);
 
     }
