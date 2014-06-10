@@ -141,6 +141,7 @@ void trace_parser(char *trace_file, char* result)
 			output_helper(output, result);
 		}
 		fclose(trace_f);
+		// wrtint final overall time taken
 	}
 }
 

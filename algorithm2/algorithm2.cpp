@@ -1000,6 +1000,11 @@ void traceParser(char *trace_file, char* result, LB_Clock *lb)
 			output_helper(output, result);
 		}
 		fclose(trace_f);
+		// write overall time stamp to output file
+		output.hit_rate = 0;
+		output.page_fault = 0;
+		output.time_stamp = lb->timeStamp;
+		output_helper(output, result);
 	}
 	return;
 }
