@@ -182,6 +182,24 @@ struct output_entry aml(int pid, char* mode)
 			//stat.hit_rate = cache_hit; // Anthony added as test to see if we could get code running
 		}
 	}
+	if(!found)
+	{
+			for(int i = 0; i < L2.size(); i++)
+			{
+				page tempPage = L2.at(i);
+				if (tempPage.id == pid)
+				{
+					tempPage.coldFlag = 0;
+					L2.push_back(tempPage);
+					L2.erase(L2.begin()+i);
+					agePages();
+					found = true;
+					cache_hit++; // Anthony added as test to see if we could get code running
+					timestamp += PAGE_READ;
+					//stat.hit_rate = cache_hit; // Anthony added as test to see if we could get code running
+				}
+			}
+	}
 
 	if(!found)
 	{
@@ -322,6 +340,24 @@ struct output_entry aml3_5(int pid, char* mode)
 			timestamp += PAGE_READ;
 			//stat.hit_rate = cache_hit; // Anthony added as test to see if we could get code running
 		}
+	}
+	if(!found)
+	{
+			for(int i = 0; i < L2.size(); i++)
+			{
+				page tempPage = L2.at(i);
+				if (tempPage.id == pid)
+				{
+					tempPage.coldFlag = 0;
+					L2.push_back(tempPage);
+					L2.erase(L2.begin()+i);
+					agePages();
+					found = true;
+					cache_hit++; // Anthony added as test to see if we could get code running
+					timestamp += PAGE_READ;
+					//stat.hit_rate = cache_hit; // Anthony added as test to see if we could get code running
+				}
+			}
 	}
 
 	if(!found)
