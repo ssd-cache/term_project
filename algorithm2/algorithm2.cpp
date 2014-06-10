@@ -756,6 +756,10 @@ void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock, LB_Node *newNode)
 		newNode->next = evictNode->next;
 		lastNode->next = newNode;
 		lb_clock->clockStart = newNode;
+		if(evictNode == lb_clock->clockHand)
+		{
+			lb_clock->clockHand = newNode;
+		}
 	}
 	else
 	{
@@ -767,6 +771,10 @@ void evictBlockFromCache(Trace *tp, LB_Clock *lb_clock, LB_Node *newNode)
 		newNode->blockNum = evictNode->blockNum;
 		newNode->next = evictNode->next;
 		lastNode->next = newNode;
+		if(evictNode == lb_clock->clockHand)
+		{
+			lb_clock->clockHand = newNode;
+		}
 	}
 
 	// freeing evicted block
@@ -860,7 +868,7 @@ LB_Node* checkVictimSetWrite(LB_Clock *lb_clock)
 	while(currNode->next != lb_clock->clockHand)
 	{
 		// think about logic here.....test
-		if(currNode->currNumOfPages >= nextNode->currNumOfPages)
+		if(nextNode != NULL && currNode->currNumOfPages >= nextNode->currNumOfPages)
 		{
 			if(currNode->refBit == 0 && currNode->currNumOfPages == lb_clock->pagePerBlock)
 			{
@@ -889,7 +897,7 @@ LB_Node* checkVictimSetRead(LB_Clock *lb_clock)
 	while(currNode->next != lb_clock->clockHand)
 	{
 		// think about logic here.....test
-		if(currNode->currNumOfPages <= nextNode->currNumOfPages)
+		if(nextNode != NULL && currNode->currNumOfPages <= nextNode->currNumOfPages)
 		{
 			if(currNode->refBit == 0 && currNode->currNumOfPages <= lb_clock->pagePerBlock)
 			{
@@ -982,6 +990,7 @@ void traceParser(char *trace_file, char* result, LB_Clock *lb)
 			sample.addr = array[0];
 			sample.size = atoi(array[1]);
 			sample.mode = array[2];
+			lowerCaseString(sample.mode);
 			sample.time_stamp = atof(array[3]);
 			checkTraceMode(&sample, lb);
 			checkTicks(lb);

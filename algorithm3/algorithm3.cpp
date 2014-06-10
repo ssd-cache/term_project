@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "cache_ssd.h"
 #include "algorithm3.h"
+#include "StringManip.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -217,6 +218,7 @@ void trace_parse(char *trace_file, char* result)
 			sample.addr = array[0];
 			sample.size = atoi(array[1]);
 			sample.mode = array[2];
+			lowerCaseString(sample.mode);
 			sample.time_stamp = atof(array[3]);
 			//page_ref[cnt_transfer] = atoi(sample.addr);
 			long value = strtol(sample.addr, NULL, 16);
