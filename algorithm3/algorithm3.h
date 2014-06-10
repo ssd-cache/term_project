@@ -1,3 +1,10 @@
+/* defentions */
+#define BLOCK_ERASE 1500
+#define PAGE_READ 25
+#define PAGE_WRITE 200
+#define DATA_TRANS 13.65
+#define MEM_ACCESS_LATE 0.0025
+
 ////4M
 //#define CACHE_SIZE 4194304
 ////1M
